@@ -4,3 +4,5 @@
 *.db
 *.sqlite3
 .virtual_documents
+*log
+*node_modules*

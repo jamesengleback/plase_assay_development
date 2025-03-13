@@ -83,7 +83,7 @@ def plot_plate_data(data,
     if legend:
         ax.legend(labels,
                   title = f'{ligand_name} concentration μM',
-                  loc='right',
+                  loc='upper right',
                   handles=handles,
                   )
 
@@ -118,7 +118,7 @@ def plot_michaelis_menten(response,
     ax.plot(x_2, y_hat, color = '0.1')
     ax.scatter(concs[~exclude_index], response[~exclude_index],  color = 'orange', s = 30)
     ax.scatter(concs[exclude_index], response[exclude_index],  color = 'gray', s = 30)
-    ax.set_ylabel('Difference in Abs')
+    ax.set_ylabel('Response')
     ax.set_xlabel('[Substrate] µM')
 
     if title is not None:
@@ -130,9 +130,9 @@ def plot_michaelis_menten(response,
     ax.set_ylim(ylim)
 
     label = dedent(f'''
-           Km = {round(km, 2)}
-           Vmax = {round(vmax, 2)}
-           R squared = {round(r_squared, 2)}
+           $K_d$ = {round(km, 2)}
+           $V_{{max}}$ = {round(vmax, 2)}
+           $R^2$ = {round(r_squared, 2)}
            ''')
     handles, labels = ax.get_legend_handles_labels()
     handles.append(mpatches.Patch(color='none', label=label))
