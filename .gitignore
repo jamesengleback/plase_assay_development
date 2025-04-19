@@ -6,3 +6,13 @@
 .virtual_documents
 *log
 *node_modules*
+*venv/
+*database.db
+*__pycache__*
+*egg-info*
+*venv
+*node_modules*
+db-checkpoints/
+*bun.lockb
+*package-lock.json
+utils/build

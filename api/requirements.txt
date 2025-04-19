@@ -1,0 +1,8 @@
+numpy
+pandas
+scipy
+matplotlib
+click
+fastapi[standard]
+sqlmodel
+../utils/
