@@ -1,0 +1,107 @@
+/* Plate.css */
+
+.plate {
+  border: 1px solid #888;
+  padding: 20px;
+  margin: 15px;
+  border-radius: 8px;
+  background-color: #fefefe;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.15);
+  width: fit-content;
+  height: fit-content;
+}
+
+.plate h1 {
+  color: #444;
+  font-size: 2em;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.plate table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  padding: 2px;
+}
+
+
+.plate td {
+  padding: 0;
+  width: fit-content;
+  height: fit-content;
+}
+
+.plate th {
+    width: 8px;
+    height: 8px;
+  padding: 10px 15px;
+  text-align: center;
+  padding: 8px;
+  margin: 2px;
+  font-size: 0.95em;
+  color: #777;
+}
+
+.plate-row {
+    display: flex;
+    flex-direction: row;
+    align-items: space-between;
+}
+
+.plate-array-area {
+  border: 1px solid #888;
+  width: fit-content;
+  height: fit-content;
+  padding: 12px;
+  background-color: #3c3836 ;
+}
+
+.plate-array-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.plate-array-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.plate-well {
+  width: 8px;
+  height: 8px;
+  padding: 10px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  margin: 2px;
+  font-size: 0.95em;
+  color: #777;
+  cursor: pointer;
+}
+
+.plate-well:hover {
+  background-color: #504945;
+}
+
+
+/*.plate-well-expand {*/
+/*    position: absolute;*/
+/*    width: 10%;*/
+/*    height: 10%;*/
+/*    background-color: #aaa;*/
+/*}*/
+
+.plate-well-expand {
+  position: relative;
+  top: 10px; /* Position below the well */
+  left: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 999; /* Ensure it's above other elements */
+  min-width: 150px; /* Adjust as needed */
+}
+

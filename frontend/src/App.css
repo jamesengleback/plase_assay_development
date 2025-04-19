@@ -1,0 +1,126 @@
+#root {
+  width: 100%;
+}
+
+.app {
+  /*max-width: 1280px;*/
+  width: 80%;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+
+  width: 100%;
+  /*height: fit-content;*/
+  height: 2em;
+
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+
+  padding: 0;
+
+  background-color: #333;
+  color: white;
+}
+
+nav ul {
+  padding: 12px;
+  margin: 0;
+}
+
+nav li {
+  /*width: calc(fit-content + 10px);*/
+  padding: 6px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  margin: 12px;
+  list-style: none;
+  cursor: pointer;
+  border: solid 1px black;
+}
+
+nav li:hover {
+  background-color: #ccc;
+}
+
+table {
+  text-align: left;
+}
+
+.card {
+  padding: 2em;
+}
+
+/* Experiment.css (or you can name it MyExperimentStyles.css, etc.) */
+
+.experiment {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin: 15px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.experiment h1 {
+  color: #333;
+  font-size: 1.8em;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.experiment table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.experiment th,
+.experiment td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.experiment th {
+  font-weight: bold;
+  color: #555;
+  width: 30%; /* Adjust as needed for label width */
+}
+
+.experiment td {
+  color: #777;
+}
+
+.experiment tr:last-child th,
+.experiment tr:last-child td {
+  border-bottom: none;
+}
+
+/* Optional: Style for arrays (like 'plates') */
+.experiment td ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.experiment td li {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 3px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #eee;
+  font-size: 0.9em;
+}
+
+.experiment td li:last-child {
+  margin-right: 0;
+}
