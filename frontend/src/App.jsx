@@ -1,67 +1,30 @@
-import { useState, useEffect } from 'react';
 import './App.css'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
-import Result from './components/Result'
-import Experiment from './components/Experiment/Experiment'
-import Plate from './components/Plate/Plate'
-
-function ExperimentList() {
-  const [experiments, setExperiments] = useState([])
-
-  useEffect(() => {
-    fetch('http://localhost:8008/experiment/')
-      .then(res => res.json())
-      .then(json => { setExperiments(json) })
-      .catch(err => { console.log(err) })
-  }, [])
-  return (
-    <>
-      {
-        experiments.map((item, idx) => (<>
-          <Experiment key={idx} {...item} />
-        </>
-        )
-        )
-      }
-    </>
-  )
-}
-
-function Plates() {
-  const [plates, setPlates] = useState([])
-
-  useEffect(() => {
-    fetch('http://localhost:8008/plate/')
-      .then(res => res.json())
-      .then(json => {  setPlates(json) })
-      .catch(err => { console.log(err) })
-  }, [])
-  return (
-    <>
-      {
-        plates.map((item, idx) => <Plate key={`plate-${idx}`} {...item} />)
-      }
-    </>
-  )
-}
+import ResultListPage from './components/Result/ResultListPage'
+import ResultPage from './components/Result/ResultPage'
+import PlatePage from './components/Plate/PlatePage'
+import ExperimentListPage from './components/Experiment/ExperimentListPage'
+import ExperimentPage from './components/Experiment/ExperimentPage'
+import Nav from './components/Nav/Nav'
 
 function App() {
 
   return (
     <Router>
-      <nav>
-        <ul>
-          <li><a href='/'>home</a></li>
-        </ul>
-        <ul>
-          <li><a href='/plates'>plates</a></li>
-        </ul>
-      </nav>
+    <Nav routes={[
+      { name: 'Experiments', href: '/'},
+      { name: 'Plates', href: '/plates'},
+      { name: 'Results', href: '/results'},
+    ]} />
       <div className='app'>
         <Routes>
-          <Route path='/' element={<ExperimentList />} />
-          <Route path='/plates' element={<Plates />} />
+          <Route path='/' element={<ExperimentListPage />} />
+          <Route path='/experiment' element={<ExperimentListPage />} />
+          <Route path='/experiment/:id' element={<ExperimentPage />} />
+          <Route path='/plates' element={<PlatePage />} />
+          <Route path='/results' element={<ResultListPage />} />
+          <Route path='/result/:id' element={<ResultPage />} />
         </Routes>
       </div>
     </Router>

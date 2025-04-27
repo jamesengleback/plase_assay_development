@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
-export default function Experiment(props) {
+export default function ExperimentCard(props) {
   const params = [
     //'id',
     //'plates',
@@ -14,12 +15,14 @@ export default function Experiment(props) {
 
   return (
     <div className='experiment' >
-      <h1> Experiment {props.id} </h1>
+      <Link to={`/experiment/${props.id}`}>
+        <h1> Experiment {props.id} </h1>
+      </Link>
       <table>
         <tbody>
           {
             params.map((item, idx) => (
-              <tr index={idx}>
+              <tr key={idx} index={idx}>
                 <th> {item} </th>
                 <td> {props[item] || ''} </td>
               </tr>
@@ -31,7 +34,7 @@ export default function Experiment(props) {
   )
 };
 
-Experiment.propTypes = {
+ExperimentCard.propTypes = {
   id: PropTypes.number,
   plates: PropTypes.arrayOf(PropTypes.number),
   start_date: PropTypes.instanceOf(Date),

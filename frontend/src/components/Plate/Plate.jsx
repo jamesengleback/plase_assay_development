@@ -9,19 +9,27 @@ function PlateArray(props) {
   const nCols = 24
 
   const [wells, setWells] = useState([])
+  const [colorBy, setColorBy] = useState('compound_concentration')
 
   useEffect(() => {
     fetch(`http://localhost:8008/well/?plate=${props.id}`)
       .then(res => res.json())
       .then(json => Object.fromEntries(json.map(item => [item.address, item])))
-      .then(item => { return item })
       .then(json => { setWells(json) })
       .catch(err => { console.error(err) })
   }, [])
   //const wells = Object.fromEntries(props?.wells.map(item => [item?.address, item]))
 
+
   return (
     <div className='plate-array-area'>
+      <select onChange={event => { setColorBy(event.target.value) }} value={colorBy} >
+        <option value='volume'>volume</option>
+        <option value='compound_concentration'>compound_concentration</option>
+        <option value='protein_concentration'>protein_concentration</option>
+        <option value='total_volume'>total_volume</option>
+        <option value='result_id'>result_id</option>
+      </select>
       <table>
         <tbody>
           {
@@ -38,7 +46,7 @@ function PlateArray(props) {
                       (colNo === 0) ?
                         <th key={`row-${rowNo}-col-${colNo}`}>{alphabet[rowNo - 1]}</th>
                         :
-                        <td key={`row-${rowNo}-col-${colNo}`}> <Well {...wells[`${alphabet[rowNo - 1]}${colNo}`]} /> </td>
+                        <td key={`row-${rowNo}-col-${colNo}`}> <Well color={colorBy} id={props.id} {...wells[`${alphabet[rowNo - 1]}${colNo}`]} /> </td>
                   ))
                 }
               </tr>
