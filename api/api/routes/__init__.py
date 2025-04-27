@@ -4,3 +4,5 @@ from . import plate
 from . import well
 from . import well
 from . import absorbance
+from . import protein
+from . import comment

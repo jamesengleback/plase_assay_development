@@ -7,11 +7,12 @@ from .serializers import PlateReturnType
 router = APIRouter()
 
 
-@router.get('/')
-@router.get('/{id}')
-def get_plate(id: str | None = None,
-              experiment: int | None = None,
-              ) -> list[PlateReturnType]:
+@router.get("/")
+@router.get("/{id}")
+def get_plate(
+    id: str | None = None,
+    experiment: int | None = None,
+) -> list[PlateReturnType]:
     query = select(Plate)
     if id is not None:
         query = query.where(Plate.id == id)

@@ -5,4 +5,5 @@ matplotlib
 click
 fastapi[standard]
 sqlmodel
+rdkit
 ../utils/

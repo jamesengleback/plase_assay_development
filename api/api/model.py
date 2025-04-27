@@ -5,15 +5,15 @@ from sqlalchemy import UniqueConstraint
 
 
 class Protein(SQLModel, table=True):
-    id: int = Field(primary_key=True)
+    id: int | None = Field(primary_key=True)
     name: str | None = Field(index=True)
     sequence: str | None
     purification: str | None
-    __table_args__ = (UniqueConstraint('name'),)
+    __table_args__ = (UniqueConstraint("name"),)
 
 
 class Compound(SQLModel, table=True):
-    id: int = Field(primary_key=True)
+    id: int | None = Field(primary_key=True)
     canonical_smiles: str | None
     name: str | None
     svg: str | None
@@ -21,11 +21,12 @@ class Compound(SQLModel, table=True):
 
 
 class Absorbance(SQLModel, table=True):
-    id: int = Field(primary_key=True)
+    id: int | None = Field(primary_key=True)
 
-    plate_data_file_id: int | None = Field(foreign_key='platedatafile.id')
-    plate_data_file: 'PlateDataFile' = Relationship(back_populates='absorbances')
-    well_id: int | None = Field(foreign_key='well.id')
+    plate_data_file_id: int | None = Field(foreign_key="platedatafile.id")
+    plate_data_file: "PlateDataFile" = Relationship(back_populates="absorbances")
+    well_id: int | None = Field(foreign_key="well.id")
+    well: "Well" = Relationship(back_populates="absorbance")
 
     wavelength: float | None
     absorbance: float | None
@@ -33,33 +34,34 @@ class Absorbance(SQLModel, table=True):
 
 class Well(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    plate_id: int | None = Field(foreign_key='plate.id')
-    plate: 'Plate' = Relationship(back_populates='wells')
+    plate_id: int | None = Field(foreign_key="plate.id")
+    plate: "Plate" = Relationship(back_populates="wells")
     address: str | None
 
-    compound_id: int | None = Field(foreign_key='compound.id')
+    compound_id: int | None = Field(foreign_key="compound.id")
     compound: Compound | None = Relationship()
     compound_concentration: float | None
 
-    protein_id: int | None = Field(foreign_key='protein.id')
+    protein_id: int | None = Field(foreign_key="protein.id")
     protein: Protein | None = Relationship()
     protein_concentration: float | None
 
     total_volume: float | None
 
-    file_id: int | None = Field(foreign_key='platedatafile.id')
-    file: 'PlateDataFile' = Relationship()
+    plate_data_file_id: int | None = Field(foreign_key="platedatafile.id")
+    plate_data_file: "PlateDataFile" = Relationship(back_populates="wells")
 
-    result_id: int | None = Field(foreign_key='result.id')
+    result_id: int | None = Field(foreign_key="result.id")
+    result: "Result" = Relationship(back_populates="test_wells")
 
-    absorbance: list[Absorbance] = Relationship()
-    annotations: list['WellAnnotation'] = Relationship()
-
+    absorbance: list[Absorbance] = Relationship(back_populates="well")
+    annotations: list["WellAnnotation"] = Relationship(back_populates="well")
 
 
 class WellAnnotation(SQLModel, table=True):
-    id: int = Field(primary_key=True)
-    well_id: int | None = Field(foreign_key='well.id')
+    id: int | None = Field(primary_key=True)
+    well_id: int | None = Field(foreign_key="well.id")
+    well: Well | None = Relationship(back_populates="annotations")
     comment: str | None
     exclude: bool | None
 
@@ -72,24 +74,34 @@ class WellAnnotation(SQLModel, table=True):
 class Plate(SQLModel, table=True):
     id: int = Field(primary_key=True)
     # experiment_id: int | None = Field(default=None, primary_key=True)
-    plate_data_file_id: int | None = Field(foreign_key='platedatafile.id')
-    plate_data_file: 'PlateDataFile' = Relationship()
+    plate_data_file_id: int | None = Field(foreign_key="platedatafile.id")
     product_name: str | None
     label: str | None
-    wells: list[Well] = Relationship(back_populates='plate')
-    experiment_id: int | None = Field(foreign_key='experiment.id')
-    experiment: 'Experiment' = Relationship()
+    wells: list[Well] = Relationship(back_populates="plate")
+    experiment_id: int | None = Field(foreign_key="experiment.id")
+    experiment: "Experiment" = Relationship()
 
 
 class PlateDataFile(SQLModel, table=True):
-    id: int = Field(primary_key=True)
+    id: int | None = Field(primary_key=True)
     plate: Plate = Relationship()
-    absorbances: list['Absorbance'] = Relationship()
+    absorbances: list[Absorbance] = Relationship(back_populates="plate_data_file")
+    wells: list[Well] = Relationship(back_populates="plate_data_file")
+    results: list["Result"] = Relationship(back_populates="plate_data_file")
 
     created_at: datetime.date | None
     path: str
     hash: str = Field(index=True)
     parse_error: bool
+
+
+class DoseResponse(SQLModel, table=True):
+    id: int | None = Field(primary_key=True)
+    concentration: float
+    response: float
+    result_id: int = Field(foreign_key="result.id")
+    result: "Result" = Relationship()
+    exclude: bool = False
 
 
 class Result(SQLModel, table=True):
@@ -98,24 +110,27 @@ class Result(SQLModel, table=True):
     # binding_experiment_id: int | None = Field(foreign_key='bindingexperiment.id')
     # binding_experiment: 'BindingExperiment' = Relationship(back_populates='result')
 
-    test_wells: list[Well] | None = Relationship()
-    control_wells: list[Well] | None = Relationship()
+    test_wells: list[Well] | None = Relationship(back_populates="result")
+    # control_wells: list[Well] | None = Relationship()
 
-    experiment_id: int | None = Field(foreign_key='experiment.id')
-    experiment: 'Experiment' = Relationship(back_populates='results')
-    plate_id: int | None = Field(foreign_key='plate.id')
+    experiment_id: int | None = Field(foreign_key="experiment.id")
+    experiment: "Experiment" = Relationship(back_populates="results")
+    plate_id: int | None = Field(foreign_key="plate.id")
     plate: Plate | None = Relationship()
-    compound_id: int | None = Field(foreign_key='compound.id')
+    plate_data_file_id: int | None = Field(foreign_key="platedatafile.id")
+    plate_data_file: PlateDataFile | None = Relationship(back_populates="results")
+    compound_id: int | None = Field(foreign_key="compound.id")
     compound: Compound | None = Relationship()
-    protein_id: int | None = Field(foreign_key='protein.id')
+    protein_id: int | None = Field(foreign_key="protein.id")
     protein: Protein | None = Relationship()
 
     protein_concentration: float | None
+    # well_volume: int | None
 
     k: float | None
     km: float | None
     vmax: float | None
-    rsq: float | None
+    r_squared: float | None
     a420_max: float | None
     auc_mean: float | None
     auc_cv: float | None
@@ -123,12 +138,14 @@ class Result(SQLModel, table=True):
     dd_soret: float | None
 
     accepted: bool | None
-    annotations: list['ResultAnnotation'] = Relationship()
+    annotations: list["ResultAnnotation"] = Relationship(back_populates="result")
+    dose_response: list[DoseResponse] = Relationship(back_populates="result")
 
 
 class ResultAnnotation(SQLModel, table=True):
-    result_id: int = Field(primary_key=True, foreign_key='result.id')
-    result: Result = Relationship()
+    id: int | None = Field(primary_key=True)
+    result_id: int = Field(foreign_key="result.id")
+    result: Result = Relationship(back_populates="annotations")
     comment: str | None
 
 
@@ -138,16 +155,18 @@ class LigandDispenseMethod(Enum):
 
 
 class AssayMixDispenseMethod(Enum):
-    electronic_multichannel_pipette = 'electronic_multichannel_pipette'
-    peristaltic_pump = 'multidrop'
+    electronic_multichannel_pipette = "electronic_multichannel_pipette"
+    peristaltic_pump = "multidrop"
 
 
 class Experiment(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    plates: list[Plate] = Relationship(back_populates='experiment')
-    results: list[Result] = Relationship(back_populates='experiment')
-    binding_experiments: list['BindingExperiment'] = Relationship(back_populates='experiment')
+    plates: list[Plate] = Relationship(back_populates="experiment")
+    results: list[Result] = Relationship(back_populates="experiment")
+    binding_experiments: list["BindingExperiment"] = Relationship(
+        back_populates="experiment"
+    )
 
     start_date: datetime.datetime | None
     dispense_assay_mix: AssayMixDispenseMethod | None
@@ -160,15 +179,15 @@ class Experiment(SQLModel, table=True):
 class BindingExperiment(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    experiment_id: int | None = Field(foreign_key='experiment.id')
+    experiment_id: int | None = Field(foreign_key="experiment.id")
     experiment: Experiment = Relationship()
-    protein_id: int | None = Field(foreign_key='protein.id')
+    protein_id: int | None = Field(foreign_key="protein.id")
     protein: Protein | None = Relationship()
-    compound_id: int | None = Field(foreign_key='compound.id')
+    compound_id: int | None = Field(foreign_key="compound.id")
     compound: Compound | None = Relationship()
-    plate_id: int | None = Field(foreign_key='plate.id')
+    plate_id: int | None = Field(foreign_key="plate.id")
     plate: Plate | None = Relationship()
-    result_id: int | None = Field(foreign_key='result.id')
+    result_id: int | None = Field(foreign_key="result.id")
     # result: Result | None = Relationship(back_populates='binding_experiment')
 
 

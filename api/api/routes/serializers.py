@@ -1,6 +1,22 @@
 import datetime
 from pydantic import BaseModel
-from ..model import Experiment, Plate, Result, AssayMixDispenseMethod, LigandDispenseMethod, BindingExperiment, Absorbance
+from ..model import (
+    Experiment,
+    Plate,
+    Result,
+    AssayMixDispenseMethod,
+    LigandDispenseMethod,
+    BindingExperiment,
+    Absorbance,
+    Protein,
+    ResultAnnotation
+)
+
+class ProteinReturnType(BaseModel):
+    id: int
+    name: str
+    sequence: str | None
+    purification: str | None
 
 class CompoundReturnType(BaseModel):
     id: int
@@ -20,30 +36,27 @@ class PlateReturnType(BaseModel):
     # experiment: Experiment
 
 
+class PlateDataFile(BaseModel):
+    id: int
+    plate: PlateReturnType | None
+    path: str
+
+
 class WellReturnType(BaseModel):
     id: int | None
     plate_id: int | None
-    # plate: PlateReturnType
     address: str | None
 
-    # compound_id: int | None
-    # compound: CompoundReturnType | None
+    compound_id: int | None
     compound_concentration: float | None
 
     protein_id: int | None
-    # protein: Protein | None
     protein_concentration: float | None
 
     total_volume: float | None
 
-    file_id: int | None
-    # file: 'PlateDataFile'
-
+    plate_data_file_id: int | None
     result_id: int | None
-    # result: 'Result'
-
-    # absorbance: list[Absorbance]
-    # annotations: list['WellAnnotation']
 
 
 class AbsorbanceReturnType(BaseModel):
@@ -63,7 +76,7 @@ class WellDetailReturnType(BaseModel):
     address: str | None
 
     compound_id: int | None
-    compound: CompoundReturnType | None
+    # compound: CompoundReturnType | None
     compound_concentration: float | None
 
     protein_id: int | None
@@ -72,27 +85,84 @@ class WellDetailReturnType(BaseModel):
 
     total_volume: float | None
 
-    file_id: int | None
-    # file: 'PlateDataFile'
+    plate_data_file_id: int | None
+    # plate_data_file: 'PlateDataFile'
 
     result_id: int | None
     # result: 'Result'
     absorbance: list[AbsorbanceReturnType]
+
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
-class ExperimentReturnType(BaseModel):
+class DoseResponseReturnType(BaseModel):
     id: int | None
+    concentration: float | None
+    response: float | None
+    exclude: bool | None
+
+
+class ResultSummaryReturnType(BaseModel):
+    experiment_id: int | None
+
+    km: float | None
+    vmax: float | None
+    r_squared: float | None
+    accepted: bool | None
+
+    compound: CompoundReturnType | None
+    protein: ProteinReturnType | None
+
+
+class ResultAnnotationReturnType(BaseModel):
+    id: int
+    result_id: int
+    comment: str | None
+
+
+class ResultReturnType(BaseModel):
+    id: int
+    experiment_id: int | None
+    accepted: bool | None
+    annotations: list[ResultAnnotationReturnType] | None
+
+    km: float | None
+    vmax: float | None
+    r_squared: float | None
+
+    dose_response: list[DoseResponseReturnType] | None
+    compound: CompoundReturnType | None
+    protein: ProteinReturnType | None
+
+
+class ResultDetailReturnType(ResultReturnType):
+    test_wells: list[WellDetailReturnType]
+    # control_wells: list[WellDetailReturnType]
+
+
+class ExperimentSummaryReturnType(BaseModel):
+    id: int
+    start_date: datetime.datetime | None
     plates: list[Plate]
-    results: list[Result]
-    binding_experiments: list['BindingExperiment']
+    results: list[ResultReturnType]
+    # binding_experiments: list["BindingExperiment"]
+    dispense_assay_mix: AssayMixDispenseMethod | None
+    dispense_ligands: LigandDispenseMethod | None
+    centrifuge_minutes: int | None
+    centrifuge_rpm: int | None
+    protein_days_thawed: int | None
+    well_volume: int | None
+
+class ExperimentDetailReturnType(BaseModel):
+    id: int
+    plates: list[Plate]
+    results: list[ResultReturnType]
+    binding_experiments: list["BindingExperiment"]
     start_date: datetime.datetime | None
     dispense_assay_mix: AssayMixDispenseMethod | None
     dispense_ligands: LigandDispenseMethod | None
     centrifuge_minutes: int | None
     centrifuge_rpm: int | None
     protein_days_thawed: int | None
-
-
-

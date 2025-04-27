@@ -8,11 +8,12 @@ from .serializers import WellReturnType, WellDetailReturnType
 router = APIRouter()
 
 
-@router.get('/')
-@router.get('/{id}')
-def get_well(id: str | None = None,
-             plate: int | None = None,
-             ) -> list[WellReturnType]:
+@router.get("/")
+@router.get("/{id}")
+def get_well(
+    id: str | None = None,
+    plate: int | None = None,
+) -> list[WellReturnType]:
     query = select(Well)
     if id is not None:
         query = query.where(Well.id == id)
@@ -24,14 +25,15 @@ def get_well(id: str | None = None,
         return data
 
 
-@router.get('/{id}/detail')
+@router.get("/{id}/detail")
 def get_well_detail(id: int) -> WellDetailReturnType:
     with Session(engine) as session:
         # well = session.get(Well, id)
-        query = select(Well).where(Well.id==id).options(
-                    selectinload(Well.absorbance),
-                    selectinload(Well.compound)
-                )
+        query = (
+            select(Well)
+            .where(Well.id == id)
+            .options(selectinload(Well.absorbance), selectinload(Well.compound))
+        )
         well = session.exec(query).first()
         if not well:
             raise HTTPException(status_code=404)
