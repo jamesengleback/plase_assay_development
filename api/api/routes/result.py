@@ -6,7 +6,15 @@ from sqlalchemy.orm import selectinload
 
 import numpy as np
 import utils
-from ..model import engine, Result, Absorbance, Well, DoseResponse, ResultAnnotation
+from ..model import (
+    engine,
+    Result,
+    Absorbance,
+    Well,
+    DoseResponse,
+    ResultAnnotation,
+    WellResultLink,
+)
 from ..dependencies import get_session, common_parameters
 from .serializers import ResultReturnType, ResultDetailReturnType, AbsorbanceReturnType
 
@@ -34,24 +42,39 @@ def get_results(
         selectinload(Result.compound),
     )
 
-    query = query.offset(common_parameters['offset']).limit(common_parameters['limit'])
+    query = query.offset(common_parameters["offset"]).limit(common_parameters["limit"])
     data = session.exec(query)
     return data
 
 
 @router.get("/{id}")
 def get_result(
-    id: int | None = None,
-    session: Session = Depends(get_session)
+    id: int | None = None, session: Session = Depends(get_session)
 ) -> ResultDetailReturnType:
-    query = select(Result).where(Result.id == id)
-    query = query.options(
-        selectinload(Result.dose_response),
-        selectinload(Result.compound),
-        selectinload(Result.test_wells).options(  # Load related PlateDataFile for Wells
-            selectinload(Well.plate_data_file)
-        ),
-        # selectinload(Result.control_wells),
+
+    # statement = (
+    #     select(Result, WellResultLink, Well, Absorbance)
+    #     .join(Well, WellResultLink.well_id == Well.id)
+    #     .join(Absorbance, WellResultLink.well_id == Absorbance.well_id) # Assuming Well.id links to Absorbance.well_id
+    #     .where(WellResultLink.result_id == id)
+    # )
+
+    query = (
+        select(Result)
+        .join(WellResultLink)
+        .options(
+            selectinload(Result.dose_response),
+            selectinload(Result.compound),
+            selectinload(Result.protein),
+            (
+            selectinload(Result.wells)
+            .options(
+                selectinload(Well.plate_data_file),
+                     )
+            # .options(selectinload(WellResultLink.well_type))
+            ),
+        )
+        .where(Result.id == id)
     )
 
     data = session.exec(query).first()
@@ -61,59 +84,74 @@ def get_result(
 @router.patch("/{id}")
 def patch_result(
     id: int | None,
-    accept: Annotated[bool, Form()] = None,
-    exclude_id: Annotated[int, Form()] = None,
-    exclude: Annotated[bool, Form()] = None,
-    comment: Annotated[str, Form()] = None,
-    session: Session = Depends(get_session)
-        ) -> ResultReturnType:
+    accept: Annotated[bool | None, Form()] = None,
+    lock: Annotated[bool | None, Form()] = None,
+    comment: Annotated[str | None, Form()] = None,
+    exclude_id: Annotated[int | None, Form()] = None,
+    exclude: Annotated[bool | None, Form()] = None,
+    session: Session = Depends(get_session),
+) -> ResultReturnType | None:
 
     result = session.get(Result, id)
 
     if result is None:
         raise HTTPException(status_code=404)
 
-    if accept:
+    if accept is not None:
         result.accepted = accept
         session.add(result)
         session.commit()
         session.refresh(result)
         return result
 
+    if lock is not None:
+        result.locked = lock
+        session.add(result)
+        session.commit()
+        session.refresh(result)
+        return result
+
     if comment:
-        annotation = ResultAnnotation(result_id=result.id,
-                                      comment=comment,
-                                      )
+        annotation = ResultAnnotation(
+            result_id=result.id,
+            comment=comment,
+        )
         session.add(annotation)
         session.commit()
         session.refresh(annotation)
         session.refresh(result)
         return result
 
-    dose_response = session.get(DoseResponse, exclude_id)
-    if dose_response is None:
-        raise HTTPException(status_code=404, detail=f'DoseResponse(id={exclude_id}) not found')
-    if result is None:
-        raise HTTPException(status_code=404, detail=f'Result(id={id}) not found')
+    if exclude_id is not None:
+        dose_response = session.get(DoseResponse, exclude_id)
+        if dose_response is None:
+            raise HTTPException(
+                status_code=404, detail=f"DoseResponse(id={exclude_id}) not found"
+            )
+        if result is None:
+            raise HTTPException(status_code=404, detail=f"Result(id={id}) not found")
 
-    dose_response.exclude = exclude
-    session.add(dose_response)
-    session.commit()
-    session.refresh(dose_response)
+        dose_response.exclude = exclude
+        session.add(dose_response)
+        session.commit()
+        session.refresh(dose_response)
 
-    xy = [[d.concentration, d.response] for d in result.dose_response if not d.exclude]
-    x = np.array([d[0] for d in xy])
-    y = np.array([d[1] for d in xy])
+        xy = [
+            [d.concentration, d.response] for d in result.dose_response if not d.exclude
+        ]
+        x = np.array([d[0] for d in xy])
+        y = np.array([d[1] for d in xy])
 
-    vmax, km = utils.mm.calculate_km(y, x)
-    r_squared = utils.mm.r_squared(y, utils.mm.curve(x, vmax, km))
+        vmax, km = utils.mm.calculate_km(y, x)
+        r_squared = utils.mm.r_squared(y, utils.mm.curve(x, vmax, km))
 
-    result.km = km
-    result.vmax = vmax
-    result.r_squared = r_squared
+        result.km = km
+        result.vmax = vmax
+        result.r_squared = r_squared
 
-    session.add(result)
-    session.commit()
-    session.refresh(result)
+        session.add(result)
+        session.commit()
+        session.refresh(result)
 
-    return result
+        return result
+    raise HTTPException(status_code=400)

@@ -6,10 +6,10 @@ from sqlalchemy import UniqueConstraint
 
 class Protein(SQLModel, table=True):
     id: int | None = Field(primary_key=True)
-    name: str | None = Field(index=True)
+    name: str | None # = Field(index=True)
     sequence: str | None
     purification: str | None
-    __table_args__ = (UniqueConstraint("name"),)
+    # __table_args__ = (UniqueConstraint("name"),)
 
 
 class Compound(SQLModel, table=True):
@@ -50,9 +50,6 @@ class Well(SQLModel, table=True):
 
     plate_data_file_id: int | None = Field(foreign_key="platedatafile.id")
     plate_data_file: "PlateDataFile" = Relationship(back_populates="wells")
-
-    result_id: int | None = Field(foreign_key="result.id")
-    result: "Result" = Relationship(back_populates="test_wells")
 
     absorbance: list[Absorbance] = Relationship(back_populates="well")
     annotations: list["WellAnnotation"] = Relationship(back_populates="well")
@@ -104,14 +101,28 @@ class DoseResponse(SQLModel, table=True):
     exclude: bool = False
 
 
+class WellTypeEnum(Enum):
+    control = 'control'
+    test = 'test'
+
+
+class WellResultLink(SQLModel, table=True):
+    well_id: int | None = Field(
+        default=None, foreign_key="well.id", primary_key=True
+    )
+    result_id: int | None = Field(
+        default=None, foreign_key="result.id", primary_key=True
+    )
+    well_type: WellTypeEnum
+
+
 class Result(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
     # binding_experiment_id: int | None = Field(foreign_key='bindingexperiment.id')
     # binding_experiment: 'BindingExperiment' = Relationship(back_populates='result')
 
-    test_wells: list[Well] | None = Relationship(back_populates="result")
-    # control_wells: list[Well] | None = Relationship()
+    wells: list[Well] | None = Relationship(link_model=WellResultLink)
 
     experiment_id: int | None = Field(foreign_key="experiment.id")
     experiment: "Experiment" = Relationship(back_populates="results")
@@ -125,18 +136,20 @@ class Result(SQLModel, table=True):
     protein: Protein | None = Relationship()
 
     protein_concentration: float | None
-    # well_volume: int | None
+    well_volume: int | None
 
     k: float | None
     km: float | None
     vmax: float | None
     r_squared: float | None
-    a420_max: float | None
-    auc_mean: float | None
-    auc_cv: float | None
-    std_405: float | None
-    dd_soret: float | None
 
+    # a420_max: float | None
+    # auc_mean: float | None
+    # auc_cv: float | None
+    # std_405: float | None
+    # dd_soret: float | None
+
+    locked: bool | None
     accepted: bool | None
     annotations: list["ResultAnnotation"] = Relationship(back_populates="result")
     dose_response: list[DoseResponse] = Relationship(back_populates="result")
@@ -194,4 +207,4 @@ class BindingExperiment(SQLModel, table=True):
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-engine = create_engine(sqlite_url, echo=True)
+engine = create_engine(sqlite_url, echo=False)

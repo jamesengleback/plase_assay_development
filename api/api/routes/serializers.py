@@ -1,3 +1,4 @@
+from typing import Optional
 import datetime
 from pydantic import BaseModel
 from ..model import (
@@ -9,14 +10,17 @@ from ..model import (
     BindingExperiment,
     Absorbance,
     Protein,
-    ResultAnnotation
+    ResultAnnotation,
+    WellResultLink
 )
+
 
 class ProteinReturnType(BaseModel):
     id: int
     name: str
     sequence: str | None
     purification: str | None
+
 
 class CompoundReturnType(BaseModel):
     id: int
@@ -88,9 +92,10 @@ class WellDetailReturnType(BaseModel):
     plate_data_file_id: int | None
     # plate_data_file: 'PlateDataFile'
 
-    result_id: int | None
+    # result_id: int | None
     # result: 'Result'
     absorbance: list[AbsorbanceReturnType]
+    # well_result_link: WellResultLink
 
     class Config:
         # orm_mode = True
@@ -126,6 +131,7 @@ class ResultReturnType(BaseModel):
     id: int
     experiment_id: int | None
     accepted: bool | None
+    locked: bool | None
     annotations: list[ResultAnnotationReturnType] | None
 
     km: float | None
@@ -135,11 +141,12 @@ class ResultReturnType(BaseModel):
     dose_response: list[DoseResponseReturnType] | None
     compound: CompoundReturnType | None
     protein: ProteinReturnType | None
+    well_volume: int | None
+    protein_concentration: float | None
 
 
 class ResultDetailReturnType(ResultReturnType):
-    test_wells: list[WellDetailReturnType]
-    # control_wells: list[WellDetailReturnType]
+    wells: list[WellDetailReturnType]
 
 
 class ExperimentSummaryReturnType(BaseModel):
@@ -153,7 +160,8 @@ class ExperimentSummaryReturnType(BaseModel):
     centrifuge_minutes: int | None
     centrifuge_rpm: int | None
     protein_days_thawed: int | None
-    well_volume: int | None
+    # well_volume: int | None
+
 
 class ExperimentDetailReturnType(BaseModel):
     id: int

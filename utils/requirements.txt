@@ -1,0 +1,11 @@
+numpy
+pandas
+scipy
+matplotlib
+click
+# sqlalchemy
+# bs4
+# flask
+fastapi[standard]
+sqlmodel
+colorama

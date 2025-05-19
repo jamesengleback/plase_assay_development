@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 
 export default function ResultResponseTable(props) {
   const setResult = props.setResult
-  console.warn(props)
   if (!props.data || props.data.length === 0) {
     return <p>No response data available.</p>;
   }

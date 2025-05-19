@@ -35,11 +35,14 @@ export function ResultTable(props) {
 }
 
 export default function Result(props) {
-  console.log('result ', props);
 
   return (
     <div className="summary-card">
       <h3 className="compound-name">
+        <Link to={`/experiment/${props.experiment_id}`}>
+          Experiment {props.experiment_id}
+        </Link>
+        <span> / </span>
         <Link to={`/result/${props.id}`}>
           Result {props.id} {props.compound?.name || 'Unknown Compound'}
         </Link>
@@ -86,6 +89,7 @@ export default function Result(props) {
 
 Result.propTypes = {
   id: PropTypes.number,
+  experiment_id: PropTypes.number,
   km: PropTypes.number,
   vmax: PropTypes.number,
   r_squared: PropTypes.number,

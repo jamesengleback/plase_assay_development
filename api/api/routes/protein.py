@@ -7,6 +7,7 @@ from .serializers import ProteinReturnType
 
 router = APIRouter()
 
+
 @router.get("/")
 def get_protein(
     common_parameters: Annotated[dict, Depends(common_parameters)],
@@ -19,6 +20,6 @@ def get_protein(
     if id:
         query = query.where(Protein.id == id)
 
-    query = query.offset(common_parameters['offset']).limit(common_parameters['limit'])
+    query = query.offset(common_parameters["offset"]).limit(common_parameters["limit"])
     data = session.exec(query)
     return data

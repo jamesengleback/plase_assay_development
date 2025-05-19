@@ -6,91 +6,79 @@ import infernoScale, { responsePlotColors } from './colors.jsx';
 export default function AbsorbancePlotMultiple({ data }) {
   const svgRef = useRef();
   const margin = { top: 20, right: 30, bottom: 45, left: 60 };
-  const width = 800 - margin.left - margin.right;
+  const width = 910 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
   const limits = { xLeft: 300, xRight: 800, yBottom: 0, yTop: 0.5 }
-  //const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-  const colorScale = d3.interpolateRgb("purple", "orange")
+
 
   const zeroEightHundred = (data) => { // absorbance data
     const a800 = data[data.findIndex(item => item.wavelength === 800)].absorbance
     return data.map(item => ({ ...item, absorbance: item.absorbance - a800 }))
   }
 
-  useEffect(() => {
-    const hasData = Array.isArray(data) && data.length > 0;
+  const drawPlot = () => {
+    const hasData = Array.isArray(data) && data.length > 0 && !data.every(item => typeof item === 'undefined');
     // console.warn(hasData)
     // console.warn('data: ', data)
 
+    const svg = d3.select(svgRef.current)
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .style("background-color", responsePlotColors.bg);
+
+    const g = svg.select("g").remove();
+    const newG = svg.append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    const xScale = d3.scaleLinear()
+      .domain([300, 800])
+      .range([0, width]);
+
+    const yScale = d3.scaleLinear()
+      .domain([0, 0.5]) // Adjust y-domain based on data
+      .range([height, 0]);
+
+    newG.append('g')
+      .attr('transform', `translate(0, ${height})`)
+      .call(d3.axisBottom(xScale));
+
+    newG.append('g')
+      .call(d3.axisLeft(yScale));
+
+    newG.selectAll(".y-label")
+      .data(["Absorbance"])
+      .join(
+        enter => enter.append("text")
+          .attr("class", "y-label")
+          .attr("transform", `rotate(-90), translate(${- height / 2}, ${-0.9 * margin.left})`)
+          .attr("dy", "1em")
+          .style("text-anchor", "middle")
+          .style("fill", responsePlotColors.fg)
+          .text(d => d),
+        update => update.text(d => d),
+        exit => exit.remove()
+      );
+
+    newG.selectAll(".x-label")
+      .data(["Wavelength (nm)"])
+      .join(
+        enter => enter
+          .append("text")
+          .attr("class", "x-label")
+          .attr("transform", `translate(${width / 2}, ${height + (0.8 * margin.bottom)})`)
+          .style("fill", responsePlotColors.fg)
+          .style("text-anchor", "middle")
+          .text(d => d),
+        update => update.text(d => d),
+        exit => exit.remove()
+      );
     if (hasData) {
-      const svg = d3.select(svgRef.current)
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .style("background-color", responsePlotColors.bg);
-
-      const g = svg.select("g").remove();
-      const newG = svg.append("g")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-      // Extract all absorbance data for scaling
-      // console.warn(data)
       const allAbsorbanceData = data.map(trace => zeroEightHundred(trace.absorbance))
-      //const allAbsorbanceData = data.map(well => well.absorbance.map(
-      //  item => {
-      //    return (
-      //      {
-      //        ...item,
-      //        absobance: item.absorbance - well.absorbance[well.absorbance.length - 1]
-      //      }
-      //    )
-      //  }
-      //)
-      //)
+
+      const concs = [...new Set(data.map(item => item.compound_concentration))]
 
       if (allAbsorbanceData.length === 0) return;
 
-      const xScale = d3.scaleLinear()
-        .domain([300, 800])
-        .range([0, width]);
-
-      const yScale = d3.scaleLinear()
-        .domain([0, 0.5]) // Adjust y-domain based on data
-        .range([height, 0]);
-
-      newG.append('g')
-        .attr('transform', `translate(0, ${height})`)
-        .call(d3.axisBottom(xScale));
-
-      newG.append('g')
-        .call(d3.axisLeft(yScale));
-
-      newG.selectAll(".y-label")
-        .data(["Absorbance"])
-        .join(
-          enter => enter.append("text")
-            .attr("class", "y-label")
-            .attr("transform", `rotate(-90), translate(${- height/2}, ${-0.9 * margin.left})`)
-            .attr("dy", "1em")
-            .style("text-anchor", "middle")
-            .style("fill", responsePlotColors.fg)
-            .text(d => d),
-          update => update.text(d => d),
-          exit => exit.remove()
-        );
-
-      newG.selectAll(".x-label")
-        .data(["Wavelength (nm)"])
-        .join(
-          enter => enter
-            .append("text")
-            .attr("class", "x-label")
-            .attr("transform", `translate(${width / 2}, ${height + (0.8 * margin.bottom)})`)
-            .style("fill", responsePlotColors.fg)
-            .style("text-anchor", "middle")
-            .text(d => d),
-          update => update.text(d => d),
-          exit => exit.remove()
-        );
 
       const line = d3.line()
         .x(d => xScale(d.wavelength))
@@ -120,33 +108,41 @@ export default function AbsorbancePlotMultiple({ data }) {
         height: height - margin.bottom,
       }
 
+      const colorScale = d3.scaleOrdinal()
+        .domain(concs)
+      // .range(d3.schemeInferno.slice(0, concs.length))
+
       const colorbar = newG.append("g")
         .classed("cbar", true)
         .attr("transform", `translate(${width - margin.left}, ${margin.top})`) // Position the colorbar
 
+
+      const barHeight = colorbarProps.height / colorbarProps.numStops
+
       colorbar.selectAll('rect')
-        .data(d3.range(colorbarProps.numStops))
+        .data(concs)
         .join("rect")
         .attr("x", 0)
-        .attr("y", (i) => (colorbarProps.height / colorbarProps.numStops) * i)
-        .attr('fill', i => infernoScale(data[i].compound_concentration / 500))
-        .attr('height', (colorbarProps.height / colorbarProps.numStops))
+        .attr("y", (i, idx) => (colorbarProps.height / colorbarProps.numStops) * idx)
+        .attr('fill', i => infernoScale(i / Math.max(...concs)))
+        .attr('height', barHeight)
         .attr('width', colorbarProps.width)
         .join('text')
 
       colorbar.selectAll('text')
-        .data(d3.range(colorbarProps.numStops))
+        .data(concs)
         .join('text')
         .attr('x', colorbarProps.width + 5) // Position text to the right of the rectangles
-        .attr('y', (i) => (i + 1) * (colorbarProps.height / colorbarProps.numStops)) // Vertically center text
+        // .attr('y', (i) => (i + 1) * (colorbarProps.height / colorbarProps.numStops)) // Vertically center text
+        .attr("y", (i, idx) => (idx + 1) * barHeight - (barHeight / 2))
         .style('alignment-baseline', 'middle')
         .style('fill', responsePlotColors.fg)
         .style('font-size', '0.8em')
-        .text(i => `${(data[i].compound_concentration).toFixed(0)}`);
+        .text(i => `${i.toFixed(2)}`);
 
       colorbar.append('text')
         .attr('y', -10)
-        .text('μM')
+        .text('[Ligand] μM')
         .style('fill', responsePlotColors.fg)
 
       //.attr("height", height * 0.8)
@@ -195,8 +191,13 @@ export default function AbsorbancePlotMultiple({ data }) {
       //  .style("text-anchor", "start")
       //  .text("Compound Concentration (uM)");
     }
+  }
+
+  useEffect(() => {
+    drawPlot()
   }, [data]);
 
+  // drawPlot()
   return (
     <>
       <svg ref={svgRef}>

@@ -10,10 +10,11 @@ router = APIRouter()
 
 
 @router.post("/")
-def post_comment(result_id: Annotated[int, Form()],
-                 comment: Annotated[str, Form()],
-                 session: Session = Depends(get_session),
-                 ) -> ResultAnnotationReturnType:
+def post_comment(
+    result_id: Annotated[int, Form()],
+    comment: Annotated[str, Form()],
+    session: Session = Depends(get_session),
+) -> ResultAnnotationReturnType:
 
     comment = ResultAnnotation(result_id=result_id, comment=comment)
     session.add(comment)
@@ -21,12 +22,14 @@ def post_comment(result_id: Annotated[int, Form()],
     session.refresh(comment)
     return comment
 
+
 @router.get("/")
 @router.get("/{id}")
-def get_comment(session: Session = Depends(get_session),
-                id: str | None = None,
-                result_id: int | None = None,
-                ) -> list[ResultAnnotationReturnType]:
+def get_comment(
+    session: Session = Depends(get_session),
+    id: str | None = None,
+    result_id: int | None = None,
+) -> list[ResultAnnotationReturnType]:
 
     query = select(ResultAnnotation)
 
@@ -39,14 +42,15 @@ def get_comment(session: Session = Depends(get_session),
 
     return data
 
+
 @router.delete("/{id}")
-def delete_comment(session: Session = Depends(get_session),
-                id: str | None = None,
-                ) -> None:
+def delete_comment(
+    session: Session = Depends(get_session),
+    id: str | None = None,
+) -> None:
     annotation = session.get(ResultAnnotation, id)
     if not annotation:
         raise HTTPException(status_code=404)
     session.delete(annotation)
     session.commit()
     return None
-

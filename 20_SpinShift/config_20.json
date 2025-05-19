@@ -640,7 +640,7 @@
             ]
         },
         "19": {
-            "ligand": "Arachadionic",
+            "ligand": "Arachadionic acid",
             "well_volume": 40,
             "protein_concentration": 15.2,
             "concentrations": [
@@ -675,7 +675,7 @@
             ]
         },
         "20": {
-            "ligand": "Arachadionic",
+            "ligand": "Arachadionic acid",
             "well_volume": 40,
             "protein_concentration": 15.2,
             "concentrations": [
@@ -710,7 +710,7 @@
             ]
         },
         "21": {
-            "ligand": "Arachadionic",
+            "ligand": "Arachadionic acid",
             "well_volume": 40,
             "protein_concentration": 15.2,
             "concentrations": [
@@ -745,7 +745,7 @@
             ]
         },
         "22": {
-            "ligand": "Arachadionic",
+            "ligand": "Arachadionic acid",
             "well_volume": 40,
             "protein_concentration": 15.2,
             "concentrations": [
@@ -780,7 +780,7 @@
             ]
         },
         "23": {
-            "ligand": "Arachadionic",
+            "ligand": "Arachadionic acid",
             "well_volume": 40,
             "protein_concentration": 15.2,
             "concentrations": [
@@ -815,7 +815,7 @@
             ]
         },
         "24": {
-            "ligand": "Arachadionic",
+            "ligand": "Arachadionic acid",
             "well_volume": 40,
             "protein_concentration": 15.2,
             "concentrations": [

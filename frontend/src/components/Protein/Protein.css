@@ -1,18 +1,67 @@
-.protein-card {
-    min-height: 240px;
+.protein-card-container {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    border: solid 1px rgba(0.5, 0.5, 0.5, 0.2);
+    border-radius: 2em;
+    margin: 1em;
+    background-color: #22201f;
+    color: #eeeeee;
+    min-height: 240px; /* Added from inline style */
     width: 240px;
-    height: 240px;
-    padding: 4px;
-    /* margin-block-end: 1em; */
+    height: 320px;
+    overflow-y: scroll;
+    position: relative; /* Inherited from previous CSS */
 }
 
-.protein-sequence {
-    width: 95%;
-    height: 90%;
-    padding: 4px;
-    background-color: var(--gruv-2);
-    inline-size: 200px;
-    overflow-wrap: anywhere;
-    overflow-y: scroll;
+.protein-header {
+    display: flex;
+    flex-direction: column;
     text-align: left;
+}
+
+.protein-name,
+.protein-accession,
+.protein-species {
+    color: #ff5e64;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    width: 80%; /* Approximate width from inline style */
+}
+
+.protein-value {
+    color: #92c281;
+}
+
+.sequence {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 90%; /* Inherited from previous CSS */
+    padding: 1em; /* Inherited from previous CSS */
+}
+
+.amino-acid {
+    font-family: 'Noto Sans Mono';
+    font-weight: normal;
+    cursor: pointer;
+    position: relative; /* Inherited from previous CSS */
+}
+
+.amino-acid:hover {
+    /* Kept from previous CSS */
+    background-color: var(--bg); /* Assuming you want the default background on hover */
+}
+
+.tooltip {
+    z-index: 1;
+    position: absolute;
+    background-color: #076678;
+    color: white;
+    padding: 10px;
+    font-size: 0.8em; /* Added for better tooltip readability */
+    white-space: nowrap; /* Prevent wrapping */
 }

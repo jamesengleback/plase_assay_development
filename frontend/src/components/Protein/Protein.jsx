@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import './Protein.css';
 
@@ -33,26 +34,62 @@ const aminoAcidColors = {
     'M': '#79740e', // Methionine (sulfur, but hydrophobic) - olive/dark yellow
 };
 
+function AminoAcid(props) {
+    const [hover, setHover] = useState(false);
+    const aminoAcid = props.aminoAcid;
+    const index = props.index;
+    return (
+        <>
+            <code
+                className='amino-acid'
+                style={{
+                    backgroundColor: aminoAcidColors[aminoAcid.toUpperCase()] || 'white',
+                }}
+                onMouseOver={(event) => { setHover(true) }}
+                onMouseLeave={(event) => { setHover(false) }}
+            >
+                {aminoAcid}
+            </code>
+            {
+                hover ?
+                    <div className='hover-label' >
+                        <code>{aminoAcid}{index}</code>
+                    </div>
+                    :
+                    <></>
+            }
+        </>
+    )
+};
+
 export default function Protein(props) {
+    const [hoverSequence, setHoverSequence] = useState(false)
+    const [hoverAA, setHoverAA] = useState({})
     const formatSequenceWithColors = (sequence) => {
         if (!sequence) {
             return null;
         }
         return sequence.split('').map((aminoAcid, index) => (
-            <>
-                <code key={index} style={{ backgroundColor: aminoAcidColors[aminoAcid.toUpperCase()] || 'white' }}>
+            <span key={index}>
+                <code
+                    className='amino-acid'
+                    style={{
+                        backgroundColor: aminoAcidColors[aminoAcid.toUpperCase()] || 'white',
+                    }}
+                    onMouseOver={(event) => { setHoverAA({ index: index, aminoAcid: aminoAcid }) }}
+                >
                     {aminoAcid}
                 </code>
                 {
-                    (index % 20 === 0 && index > 0) ?
-                        <>
-                            <code> {index} </code>
+                    ((index + 1) % 20 === 0 && index > 0) ?
+                        <span>
+                            <code key={index}> {index + 1} </code>
                             <br />
-                        </>
+                        </span>
                         :
                         <></>
                 }
-            </>
+            </span>
         ));
     };
     const formatSequence = (sequence) => {
@@ -67,11 +104,29 @@ export default function Protein(props) {
         ));
     };
 
+    console.warn(props.sequence)
     return (
-        <div className='info-card protein-card'>
+        <div className='info-card'>
             <span><strong>{props.name}</strong></span>
-            <div className='protein-sequence'>
-                {formatSequenceWithColors(props.sequence) || <></>}
+            <div className='hover-label'>
+                {
+                    hoverSequence ?
+                        <code>{hoverAA.aminoAcid}{hoverAA.index}</code>
+                        :
+                        <></>
+                }
+            </div>
+            <div className='protein-sequence'
+                onMouseEnter={() => { setHoverSequence(true) }}
+                onMouseLeave={() => { setHoverSequence(false) }}
+            >
+                {/* {formatSequenceWithColors(props.sequence) || <></>} */}
+                {
+                    props.sequence ?
+                        props.sequence.split('').map((item, idx) => <AminoAcid index={idx} key={idx} aminoAcid={item} />)
+                        :
+                        <></>
+                }
             </div>
         </div>
     )
