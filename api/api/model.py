@@ -46,7 +46,7 @@ class Well(SQLModel, table=True):
     protein: Protein | None = Relationship()
     protein_concentration: float | None
 
-    total_volume: float | None
+    volume: float | None
 
     plate_data_file_id: int | None = Field(foreign_key="platedatafile.id")
     plate_data_file: "PlateDataFile" = Relationship(back_populates="wells")
@@ -97,13 +97,34 @@ class DoseResponse(SQLModel, table=True):
     concentration: float
     response: float
     result_id: int = Field(foreign_key="result.id")
-    result: "Result" = Relationship()
+    result: "Result" = Relationship(back_populates="dose_response")
     exclude: bool = False
+
+    test_well_id: int | None = Field(foreign_key="well.id")
+    test_well: Well | None = Relationship(
+            sa_relationship_kwargs={
+            "foreign_keys": "DoseResponse.test_well_id", 
+        }
+            )
+
+    control_well_id: int | None = Field(foreign_key="well.id")
+    control_well: Well | None = Relationship(
+            sa_relationship_kwargs={
+            "foreign_keys": "DoseResponse.control_well_id", 
+        }
+            )
 
 
 class WellTypeEnum(Enum):
     control = 'control'
     test = 'test'
+
+
+class WellDoseResponseLink(SQLModel, table=True):
+    well_id: int | None = Field(
+        default=None, foreign_key="well.id", primary_key=True
+    )
+    well_type: WellTypeEnum
 
 
 class WellResultLink(SQLModel, table=True):
@@ -122,21 +143,23 @@ class Result(SQLModel, table=True):
     # binding_experiment_id: int | None = Field(foreign_key='bindingexperiment.id')
     # binding_experiment: 'BindingExperiment' = Relationship(back_populates='result')
 
-    wells: list[Well] | None = Relationship(link_model=WellResultLink)
 
-    experiment_id: int | None = Field(foreign_key="experiment.id")
-    experiment: "Experiment" = Relationship(back_populates="results")
-    plate_id: int | None = Field(foreign_key="plate.id")
-    plate: Plate | None = Relationship()
-    plate_data_file_id: int | None = Field(foreign_key="platedatafile.id")
-    plate_data_file: PlateDataFile | None = Relationship(back_populates="results")
-    compound_id: int | None = Field(foreign_key="compound.id")
+
+    # result: Result | None = Relationship(back_populates='binding_experiment')
+    # well_volume: int | None
     compound: Compound | None = Relationship()
-    protein_id: int | None = Field(foreign_key="protein.id")
+    compound_id: int | None = Field(foreign_key="compound.id")
+    experiment: "Experiment" = Relationship(back_populates="results")
+    experiment_id: int | None = Field(foreign_key="experiment.id")
+    plate: Plate | None = Relationship()
+    plate_data_file: PlateDataFile | None = Relationship(back_populates="results")
+    plate_data_file_id: int | None = Field(foreign_key="platedatafile.id")
+    plate_id: int | None = Field(foreign_key="plate.id")
     protein: Protein | None = Relationship()
-
     protein_concentration: float | None
-    well_volume: int | None
+    protein_id: int | None = Field(foreign_key="protein.id")
+    result_id: int | None = Field(foreign_key="result.id")
+    wells: list[Well] | None = Relationship(link_model=WellResultLink)
 
     k: float | None
     km: float | None
@@ -177,9 +200,6 @@ class Experiment(SQLModel, table=True):
 
     plates: list[Plate] = Relationship(back_populates="experiment")
     results: list[Result] = Relationship(back_populates="experiment")
-    binding_experiments: list["BindingExperiment"] = Relationship(
-        back_populates="experiment"
-    )
 
     start_date: datetime.datetime | None
     dispense_assay_mix: AssayMixDispenseMethod | None
@@ -189,19 +209,19 @@ class Experiment(SQLModel, table=True):
     protein_days_thawed: int | None
 
 
-class BindingExperiment(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-
-    experiment_id: int | None = Field(foreign_key="experiment.id")
-    experiment: Experiment = Relationship()
-    protein_id: int | None = Field(foreign_key="protein.id")
-    protein: Protein | None = Relationship()
-    compound_id: int | None = Field(foreign_key="compound.id")
-    compound: Compound | None = Relationship()
-    plate_id: int | None = Field(foreign_key="plate.id")
-    plate: Plate | None = Relationship()
-    result_id: int | None = Field(foreign_key="result.id")
-    # result: Result | None = Relationship(back_populates='binding_experiment')
+# class BindingExperiment(SQLModel, table=True):
+#     id: int | None = Field(default=None, primary_key=True)
+#
+#     experiment_id: int | None = Field(foreign_key="experiment.id")
+#     experiment: Experiment = Relationship()
+#     protein_id: int | None = Field(foreign_key="protein.id")
+#     protein: Protein | None = Relationship()
+#     compound_id: int | None = Field(foreign_key="compound.id")
+#     compound: Compound | None = Relationship()
+#     plate_id: int | None = Field(foreign_key="plate.id")
+#     plate: Plate | None = Relationship()
+#     result_id: int | None = Field(foreign_key="result.id")
+#     # result: Result | None = Relationship(back_populates='binding_experiment')
 
 
 sqlite_file_name = "database.db"

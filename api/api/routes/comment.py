@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, Form
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
-from ..model import ResultAnnotation, engine
+from ..model import ResultAnnotation, Result, engine
 from ..dependencies import get_session, common_parameters
 from .serializers import ResultAnnotationReturnType
 
@@ -15,12 +15,15 @@ def post_comment(
     comment: Annotated[str, Form()],
     session: Session = Depends(get_session),
 ) -> ResultAnnotationReturnType:
-
-    comment = ResultAnnotation(result_id=result_id, comment=comment)
-    session.add(comment)
-    session.commit()
-    session.refresh(comment)
-    return comment
+    result = session.get(Result, result_id)
+    if not result.locked:
+        annotation = ResultAnnotation(result_id=result_id, comment=comment)
+        session.add(annotation)
+        session.commit()
+        session.refresh(annotation)
+        return annotation
+    else:
+        raise HTTPException(status_code=403, detail="Result is locked")
 
 
 @router.get("/")
@@ -30,7 +33,6 @@ def get_comment(
     id: str | None = None,
     result_id: int | None = None,
 ) -> list[ResultAnnotationReturnType]:
-
     query = select(ResultAnnotation)
 
     if result_id:
@@ -51,6 +53,9 @@ def delete_comment(
     annotation = session.get(ResultAnnotation, id)
     if not annotation:
         raise HTTPException(status_code=404)
-    session.delete(annotation)
-    session.commit()
-    return None
+    if not annotation.result.locked:
+        session.delete(annotation)
+        session.commit()
+        return None
+    else:
+        raise HTTPException(status_code=403, detail="Result is locked")

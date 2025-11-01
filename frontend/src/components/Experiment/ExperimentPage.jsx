@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleCheck } from '@fortawesome/free-solid-svg-icons'
+import Chip from '../UI/Chip.jsx';
+import { faCircleCheck, faCalendar, faFlask, faVial, faRotate, faVialCircleCheck, faTable } from
+  '@fortawesome/free-solid-svg-icons'
 
 export default function ExperimentPage(props) {
   const { id } = useParams();
@@ -13,85 +15,82 @@ export default function ExperimentPage(props) {
       .then(res => res.json())
       .then(json => { setExperiment(json) })
       .catch(err => { console.error(err) })
-  }, [])
+  }, [id])
 
   return (
     <div className='page'>
       <h2> Experiment {id} </h2>
-      <table className="result-table">
-        <tbody>
-          <tr>
-            <th> start date</th>
-            <td> {experiment.start_date?.split('T')[0]} </td>
-          </tr>
-          <tr>
-            <th> dispense ligands</th>
-            <td> {experiment.dispense_ligands} </td>
-          </tr>
-          <tr>
-            <th> dispense assay mix</th>
-            <td> {experiment.dispense_assay_mix} </td>
-          </tr>
-          <tr>
-            <th> centrifuge rpm</th>
-            <td> {experiment.centrifuge_rpm} </td>
-          </tr>
-          <tr>
-            <th> centrifuge minutes</th>
-            <td> {experiment.centrifuge_minutes} </td>
-          </tr>
-          <tr>
-            <th> protein days thawed</th>
-            <td> {experiment.protein_days_thawed} </td>
-          </tr>
-          <tr>
-            <th> Number of Results</th>
-            <td> {experiment.results?.length} </td>
-          </tr>
-          <tr>
-            <th> Number of Plates</th>
-            <td> {experiment.plates?.length} </td>
-          </tr>
-        </tbody>
-      </table>
+      <div style={{ width: 'fit-content' }}>
+        <div className='row' style={{ justifyContent: 'space-between', width: '100%' }}>
+          <Chip style={{ backgroundColor: 'var(--gruv-24)' }} label={<span>{experiment.results?.length}{' '}
+            results</span>}
+            icon={
+              <FontAwesomeIcon style={{ color: 'var(gruv-1)' }} icon={faVialCircleCheck} />}
+          />
+          <Chip style={{ backgroundColor: 'var(--gruv-22)' }} label={<span>{experiment.plates?.length}{' '}
+            plates</span>}
+            icon={
+              <FontAwesomeIcon style={{ color: 'var(gruv-1)' }} icon={faTable} />}
+          />
+          <vr style={{ width: '1px', backgroundColor: 'var(--fg)', opacity: 0.3 }}></vr>
+          <Chip style={{ backgroundColor: 'var(--gruv-21)' }} label={<span>{experiment.dispense_assay_mix}</span>}
+            icon={
+              <FontAwesomeIcon style={{ color: 'var(--gruv-1)' }} icon={faFlask} />}
+          />
+          <Chip style={{ backgroundColor: 'var(--gruv-20)' }} label={<span>{experiment.dispense_ligands}</span>}
+            icon={
+              <FontAwesomeIcon style={{ color: 'var(gruv-1)' }} icon={faVial} />}
+          />
+          <Chip style={{ backgroundColor: 'var(--gruv-28)' }} icon={<FontAwesomeIcon icon={faCalendar} />}
+            label={<span>{experiment.start_date?.split('T')[0]}</span>}
+          />
+          <Chip style={{ backgroundColor: 'var(--gruv-25)' }} label={<span>{experiment.centrifuge_minutes}m @
+            {experiment.centrifuge_rpm}rpm</span>}
+            icon={
+              <FontAwesomeIcon style={{ color: 'var(gruv-1)' }} icon={faRotate} />}
+          />
+        </div>
 
-      <div className="table-container">
-        <table className="result-table">
-          <thead>
-            <tr>
-              <th>Result ID</th>
-              <th>V<sub>max</sub></th>
-              <th>K<sub>m</sub></th>
-              <th>R<sup>2</sup></th>
-              <th>Checked</th>
-              <th>Accepted</th>
-              <th>Compound</th>
-              <th>Protein</th>
-              <th>Well Volume</th>
-              <th>[Protein]</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              experiment?.results?.map((result, idx) => <tr key={idx}>
-                <td><Link to={`/result/${result.id}`}>Result {result.id}</Link></td>
-                <td>{result.vmax ? result.vmax.toFixed(3) : 'N/A'}</td>
-                <td>{result.km ? result.km.toFixed(3) : 'N/A'}</td>
-                <td>{result.r_squared ? result.r_squared.toFixed(3) : 'N/A'}</td>
-                <td>{result.checked ? <span> <FontAwesomeIcon style={{
-                  color: '#72ff72'
-                }} icon={faCircleCheck} /> </span> : <></>}</td>
-                <td>{result.accepted ? <span> <FontAwesomeIcon style={{
-                  color: '#72ff72'
-                }} icon={faCircleCheck} /> </span> : <></>}</td>
-                <td>{result.compound.name}</td>
-                <td>{result.protein.name}</td>
-                <td>{result.well_volume}</td>
-                <td>{result.protein_concentration}</td>
-              </tr>)
-            }
-          </tbody>
-        </table>
+        <div className="table-container">
+          <table className="result-table">
+            <thead>
+              <tr>
+                <th>Result ID</th>
+                <th>V<sub>max</sub></th>
+                <th>K<sub>m</sub></th>
+                <th>R<sup>2</sup></th>
+                <th>Checked</th>
+                <th>Accepted</th>
+                <th>Compound</th>
+                <th>Protein</th>
+                <th>Well Volume</th>
+                <th>[Protein]</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                experiment?.results?.map((result, idx) => <tr key={idx}>
+                  <td>
+                    <Link to={`/result/${result.id}`}>Result {result.id}</Link>
+                  </td>
+                  <td>{result.vmax ? result.vmax.toFixed(3) : 'N/A'}</td>
+                  <td>{result.km ? result.km.toFixed(3) : 'N/A'}</td>
+                  <td>{result.r_squared ? result.r_squared.toFixed(3) : 'N/A'}</td>
+                  <td>{result.checked ? <span>
+                    <FontAwesomeIcon style={{ color: '#72ff72' }} icon={faCircleCheck} />
+                  </span> : <></>}</td>
+                  <td>{result.accepted ? <span>
+                    <FontAwesomeIcon style={{ color: '#72ff72' }} icon={faCircleCheck} />
+                  </span> : <></>}</td>
+                  <td>{result.compound.name}</td>
+                  <td>{result.protein.name}</td>
+                  <td>{result.well_volume}</td>
+                  <td>{result.protein_concentration}</td>
+                </tr>)
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>

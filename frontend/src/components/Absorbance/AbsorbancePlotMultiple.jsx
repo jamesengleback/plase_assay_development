@@ -3,12 +3,27 @@ import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import infernoScale, { responsePlotColors } from './colors.jsx';
 
-export default function AbsorbancePlotMultiple({ data }) {
+export default function AbsorbancePlotMultiple({ data, result }) {
+  // console.log(result.dose_response)
+  const excludeDict = result?.dose_response && Object.fromEntries(result?.dose_response?.map(i => [i.concentration, i.exclude]))
   const svgRef = useRef();
   const margin = { top: 20, right: 30, bottom: 45, left: 60 };
-  const width = 910 - margin.left - margin.right;
+  const width = (window.innerWidth * 0.8) - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
-  const limits = { xLeft: 300, xRight: 800, yBottom: 0, yTop: 0.5 }
+  const limits = {
+    xMin: 300,
+    xMax: 800,
+    yMin: Math.min(...data.map(i => Math.min(...i.absorbance.filter(i => i.wavelength > 300).map(i => i.absorbance)))) || 0,
+    yMax: Math.max(...data.map(i => Math.max(...i.absorbance.filter(i => i.wavelength > 300).map(i => i.absorbance))) || 0.5),
+  }
+
+  const colorbarProps = {
+    numStops: 8,
+    width: 20,
+    stopHeight: 10,
+    height: height - margin.bottom,
+  }
+  // const limits = { xLeft: 300, xRight: 800, yBottom: 0, yTop: 0.5 }
 
 
   const zeroEightHundred = (data) => { // absorbance data
@@ -16,11 +31,9 @@ export default function AbsorbancePlotMultiple({ data }) {
     return data.map(item => ({ ...item, absorbance: item.absorbance - a800 }))
   }
 
-  const drawPlot = () => {
-    const hasData = Array.isArray(data) && data.length > 0 && !data.every(item => typeof item === 'undefined');
-    // console.warn(hasData)
-    // console.warn('data: ', data)
+  const hasData = Array.isArray(data) && data.length > 0 && !data.every(item => typeof item === 'undefined');
 
+  useEffect(() => {
     const svg = d3.select(svgRef.current)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
@@ -31,11 +44,11 @@ export default function AbsorbancePlotMultiple({ data }) {
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     const xScale = d3.scaleLinear()
-      .domain([300, 800])
+      .domain([limits.xMin, limits.xMax])
       .range([0, width]);
 
     const yScale = d3.scaleLinear()
-      .domain([0, 0.5]) // Adjust y-domain based on data
+      .domain([limits.yMin * 1.1, limits.yMax * 1.1])
       .range([height, 0]);
 
     newG.append('g')
@@ -72,6 +85,7 @@ export default function AbsorbancePlotMultiple({ data }) {
         update => update.text(d => d),
         exit => exit.remove()
       );
+
     if (hasData) {
       const allAbsorbanceData = data.map(trace => zeroEightHundred(trace.absorbance))
 
@@ -87,30 +101,22 @@ export default function AbsorbancePlotMultiple({ data }) {
       // Plot absorbance for each test well
       allAbsorbanceData.forEach((absorbanceMeasurement, idx) => {
 
-        // console.warn(absorbanceMeasurement);
+        const exclude = excludeDict[data[idx].compound_concentration]
         if (absorbanceMeasurement.length > 0) {
           newG.append('path')
-            .datum(absorbanceMeasurement.filter(item => item.wavelength > limits.xLeft && item.wavelength <= limits.xRight))
+            .datum(absorbanceMeasurement.filter(item => item.wavelength > limits.xMin && item.wavelength <= limits.xMax))
             .attr("d", line)
             .attr("class", "line")
             .attr("fill", "none")
-            .attr("stroke", infernoScale(data[idx].compound_concentration / 500))
+            .attr("stroke",  infernoScale(data[idx].compound_concentration / Math.max(...concs)))
+            // .attr("stroke", excludeDict[data[idx].compound_concentration] ? "#FFFFFF" : infernoScale(data[idx].compound_concentration / Math.max(...concs)))
             .attr("stroke-width", 3)
             .attr("stroke-linejoin", "round")
-            .attr("stroke-linecap", "round");
+            .attr("stroke-linecap", "round")
+            .style("stroke-dasharray", exclude ? (6,6): "")
+            // .style("stroke", i => (exclude ? "solid" : "dashed"))
         }
       });
-
-      const colorbarProps = {
-        numStops: 8,
-        width: 20,
-        stopHeight: 10,
-        height: height - margin.bottom,
-      }
-
-      const colorScale = d3.scaleOrdinal()
-        .domain(concs)
-      // .range(d3.schemeInferno.slice(0, concs.length))
 
       const colorbar = newG.append("g")
         .classed("cbar", true)
@@ -124,10 +130,10 @@ export default function AbsorbancePlotMultiple({ data }) {
         .join("rect")
         .attr("x", 0)
         .attr("y", (i, idx) => (colorbarProps.height / colorbarProps.numStops) * idx)
-        .attr('fill', i => infernoScale(i / Math.max(...concs)))
+        .attr('fill', i => (i.exclude ? responsePlotColors.bg : infernoScale(i / Math.max(...concs))))
         .attr('height', barHeight)
         .attr('width', colorbarProps.width)
-        .join('text')
+      // .join('text')
 
       colorbar.selectAll('text')
         .data(concs)
@@ -144,60 +150,10 @@ export default function AbsorbancePlotMultiple({ data }) {
         .attr('y', -10)
         .text('[Ligand] μM')
         .style('fill', responsePlotColors.fg)
-
-      //.attr("height", height * 0.8)
-      //.attr("width", 20)
-
-      //.data(d3.range(numStops))
-      //  .join("rect")
-      //    .attr("y", (i) => yScale(i / (numStops - 1) * (d3.extent(allAbsorbanceData.flat(), d => d.absorbance)[1] || 0.5))) // Approximate y-position
-      //    .attr("height", Math.max(0, height / numStops))
-      //    .attr("fill", (i) => colorScaleForBar(i / (numStops - 1)));
-
-      // Add Colorbar
-      //const colorbarWidth = 20;
-      //const colorbarHeight = height;
-      //const numStops = 10; // Number of color stops in the bar
-      //
-      //const colorScaleForBar = d3.scaleLinear()
-      //  .domain([0, 1]) // Normalized concentration (assuming 0 to 500 uM)
-      //  .range(["purple", "orange"]);
-      //
-      //const colorbar = newG.append("g")
-      //  .attr("transform", `translate(${width + 30}, 0)`); // Position the colorbar
-      //
-      //colorbar.selectAll("rect")
-      //  .data(d3.range(numStops))
-      //  .join("rect")
-      //  .attr("y", (i) => yScale(i / (numStops - 1) * (d3.extent(allAbsorbanceData.flat(), d => d.absorbance)[1] || 0.5))) // Approximate y-position
-      //  .attr("height", Math.max(0, height / numStops))
-      //  .attr("width", colorbarWidth)
-      //  .attr("fill", (i) => colorScaleForBar(i / (numStops - 1)));
-      //
-      //const colorbarAxisScale = d3.scaleLinear()
-      //  .domain([0, 500]) // Actual concentration range
-      //  .range([height, 0]);
-      //
-      //const colorbarAxis = d3.axisRight(colorbarAxisScale)
-      //  .ticks(5);
-      //
-      //colorbar.append("g")
-      //  .attr("transform", `translate(${colorbarWidth}, 0)`)
-      //  .call(colorbarAxis);
-      //
-      //colorbar.append("text")
-      //  .attr("x", colorbarWidth + 10)
-      //  .attr("y", -10)
-      //  .style("text-anchor", "start")
-      //  .text("Compound Concentration (uM)");
     }
-  }
 
-  useEffect(() => {
-    drawPlot()
   }, [data]);
 
-  // drawPlot()
   return (
     <>
       <svg ref={svgRef}>

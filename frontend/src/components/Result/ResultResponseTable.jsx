@@ -19,27 +19,29 @@ export default function ResultResponseTable(props) {
         </thead>
         <tbody>
           {props?.data.map(item => (
-            <tr key={item.id}>
+            <tr key={item.id}
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                const form = new FormData()
+                form.append('exclude_id', item.id)
+                form.append('exclude', !item.exclude)
+                fetch(`http://localhost:8008/result/${props.result_id}`,
+                  {
+                    method: 'PATCH',
+                    body: form
+                  }
+                )
+                  .then(res => res.json())
+                  .then(json => { setResult(json) })
+                  .catch(err => { console.error(err) })
+              }
+              }>
               <td>{item.concentration.toFixed(2)}</td>
               <td>{item.response.toFixed(3)}</td>
               <td>
                 <input type='checkbox'
-                  defaultChecked={item.exclude}
-                  onChange={(event) => {
-                    const form = new FormData()
-                    form.append('exclude_id', item.id)
-                    form.append('exclude', event.target.checked)
-                    fetch(`http://localhost:8008/result/${props.result_id}`,
-                      {
-                        method: 'PATCH',
-                        body: form
-                      }
-                    )
-                      .then(res => res.json())
-                      .then(json => { console.warn(json); return json })
-                      .then(json => { setResult(json) })
-                      .catch(err => { console.error(err) })
-                  }}
+                  checked={item.exclude}
+                  onChange={() => { }}
                 />
               </td>
             </tr>

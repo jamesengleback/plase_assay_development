@@ -187,7 +187,6 @@ def main(args):
                     logging.warning(e)
                     # continue
 
-
                 plate = model.Plate(label=plate_config_key,
                                     experiment=experiment,
                                     product_name=plate_config_value.get('plate_type'),
@@ -220,7 +219,7 @@ def main(args):
                                                                            ):
 
                             # test wells
-                            well = model.Well(
+                            test_well = model.Well(
                                     plate=plate,
                                     compound=compound,
                                     protein=protein,
@@ -228,13 +227,13 @@ def main(args):
                                     protein_concentration=independent_variables.get('protein_concentration'),
                                     compound_concentration=conc,
                                     address=test_well_addr,
-                                    total_volume=independent_variables.get('well_volume'),
+                                    volume=independent_variables.get('well_volume'),
                                     )
 
-                            session.add(well)
+                            session.add(test_well)
                             session.commit()
-                            session.refresh(well)
-                            test_wells.append(well)
+                            session.refresh(test_well)
+                            test_wells.append(test_well)
 
                             well_absorbance = df.loc[test_well_addr, :]
 
@@ -242,14 +241,14 @@ def main(args):
                                 absorbance = model.Absorbance(
                                         wavelength=wavelength,
                                         absorbance=absorbance_value,
-                                        well_id=well.id,
+                                        well_id=test_well.id,
                                         plate_data_file_id=plate_data_file.id
                                         )
                                 session.add(absorbance)
                             session.commit()
 
                             # control wells
-                            well = model.Well(
+                            control_well = model.Well(
                                     plate=plate,
                                     compound=compound,
                                     protein=protein,
@@ -257,13 +256,13 @@ def main(args):
                                     protein_concentration=0,
                                     compound_concentration=conc,
                                     address=control_well_addr,
-                                    total_volume=independent_variables.get('well_volume'),
+                                    volume=independent_variables.get('well_volume'),
                                     )
 
-                            session.add(well)
+                            session.add(control_well)
                             session.commit()
-                            session.refresh(well)
-                            control_wells.append(well)
+                            session.refresh(control_well)
+                            control_wells.append(control_well)
 
                             well_absorbance = df.loc[control_well_addr, :]
 
@@ -271,7 +270,7 @@ def main(args):
                                 absorbance = model.Absorbance(
                                         wavelength=wavelength,
                                         absorbance=absorbance_value,
-                                        well_id=well.id,
+                                        well_id=control_well.id,
                                         plate_data_file_id=plate_data_file.id
                                         )
                                 session.add(absorbance)
@@ -295,6 +294,7 @@ def main(args):
 
                         corrected_data = corrected_data.subtract(corrected_data[800], axis=0)
 
+                        dose_responses = []
                         if concs is not None:
                             corrected_data = corrected_data.sort_index()
                             diff_data = corrected_data.subtract(corrected_data.iloc[concs.argmin(), :], axis=1)
@@ -303,10 +303,17 @@ def main(args):
                             try:
                                 vmax, km = utils.mm.calculate_km(response, concs)
                                 r_squared = utils.mm.r_squared(response, utils.mm.curve(concs, vmax, km))
-                                dose_response = [model.DoseResponse(concentration=conc_i,
-                                                                    response=response_i)
-                                                 for conc_i, response_i in zip(concs, response)]
-
+                                for conc_i, response_i, test_well, control_well in zip(concs, response, test_wells, control_wells):
+                                    test_well = session.refresh(test_well)
+                                    control_well = session.refresh(control_well)
+                                    dose_response = model.DoseResponse(concentration=conc_i,
+                                                                  response=response_i,
+                                                                  test_well=test_well,
+                                                                  conrol_well=control_well,
+                                                                  )
+                                    # session.add(dose_response)
+                                    # session.refresh(dose_response)
+                                    dose_responses.append(dose_response)
                             except:
                                 vmax, km, r_squared = None, None, None
                                 dose_response = []
@@ -316,7 +323,7 @@ def main(args):
                         # for well in test_wells:
                         #     session.refresh(well)
 
-                        well_volume = set([well.total_volume for well in test_wells + control_wells])
+                        well_volume = set([well.volume for well in test_wells + control_wells])
                         assert len(well_volume) == 1
                         well_volume = well_volume.pop()
 
@@ -324,22 +331,17 @@ def main(args):
                         assert len(protein_concentration) == 1
                         protein_concentration = protein_concentration.pop()
 
-                        result = model.Result(plate_data_file_id=plate_data_file.id,
-                                              protein_id=protein.id,
+                        result = model.Result(plate_data_file=plate_data_file,
                                               protein=protein,
                                               # test_wells=test_wells,
                                               # control_wells=control_wells,
                                               experiment=experiment,
-                                              experiment_id=experiment.id,
-                                              plate_id=plate.id,
                                               plate=plate,
                                               compound=compound,
-                                              compound_id=compound.id,
                                               km=km,
                                               vmax=vmax,
                                               r_squared=r_squared,
-                                              dose_response=dose_response,
-                                              well_volume=well_volume,
+                                              dose_response=dose_responses,
                                               protein_concentration=protein_concentration,
                                               )
                         session.add(result)

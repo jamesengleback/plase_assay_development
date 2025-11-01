@@ -66,18 +66,21 @@ def get_result(
             selectinload(Result.dose_response),
             selectinload(Result.compound),
             selectinload(Result.protein),
-            (
-            selectinload(Result.wells)
-            .options(
-                selectinload(Well.plate_data_file),
-                     )
-            # .options(selectinload(WellResultLink.well_type))
-            ),
+            # (
+            # selectinload(Result.wells)
+            # .options(
+            #     selectinload(Well.plate_data_file),
+            #          )
+            # # .options(selectinload(WellResultLink.well_type))
+            # ),
         )
         .where(Result.id == id)
     )
 
     data = session.exec(query).first()
+    if data is None:
+        raise HTTPException(status_code=404, detail=f'Result(id={id}) not found')
+
     return data
 
 
@@ -90,7 +93,7 @@ def patch_result(
     exclude_id: Annotated[int | None, Form()] = None,
     exclude: Annotated[bool | None, Form()] = None,
     session: Session = Depends(get_session),
-) -> ResultReturnType | None:
+) -> ResultDetailReturnType | None:
 
     result = session.get(Result, id)
 

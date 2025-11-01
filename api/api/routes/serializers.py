@@ -2,14 +2,14 @@ from typing import Optional
 import datetime
 from pydantic import BaseModel
 from ..model import (
-    Experiment,
-    Plate,
-    Result,
-    AssayMixDispenseMethod,
-    LigandDispenseMethod,
-    BindingExperiment,
     Absorbance,
+    AssayMixDispenseMethod,
+    DoseResponse,
+    Experiment,
+    LigandDispenseMethod,
+    Plate,
     Protein,
+    Result,
     ResultAnnotation,
     WellResultLink
 )
@@ -46,6 +46,24 @@ class PlateDataFile(BaseModel):
     path: str
 
 
+class AbsorbanceReturnType(BaseModel):
+    id: int
+
+    plate_data_file_id: int | None
+    # plate_data_file: 'PlateDataFile'
+    well_id: int | None
+
+    wavelength: float | None
+    absorbance: float | None
+
+
+class DoseResponseReturnType(BaseModel):
+    id: int | None
+    concentration: float | None
+    response: float | None
+    exclude: bool | None
+
+
 class WellReturnType(BaseModel):
     id: int | None
     plate_id: int | None
@@ -57,21 +75,9 @@ class WellReturnType(BaseModel):
     protein_id: int | None
     protein_concentration: float | None
 
-    total_volume: float | None
+    volume: float | None
 
     plate_data_file_id: int | None
-    result_id: int | None
-
-
-class AbsorbanceReturnType(BaseModel):
-    id: int
-
-    plate_data_file_id: int | None
-    # plate_data_file: 'PlateDataFile'
-    well_id: int | None
-
-    wavelength: float | None
-    absorbance: float | None
 
 
 class WellDetailReturnType(BaseModel):
@@ -87,7 +93,7 @@ class WellDetailReturnType(BaseModel):
     # protein: Protein | None
     protein_concentration: float | None
 
-    total_volume: float | None
+    volume: float | None
 
     plate_data_file_id: int | None
     # plate_data_file: 'PlateDataFile'
@@ -96,17 +102,11 @@ class WellDetailReturnType(BaseModel):
     # result: 'Result'
     absorbance: list[AbsorbanceReturnType]
     # well_result_link: WellResultLink
+    # dose_response: list[DoseResponseReturnType]
 
     class Config:
         # orm_mode = True
         from_attributes = True
-
-
-class DoseResponseReturnType(BaseModel):
-    id: int | None
-    concentration: float | None
-    response: float | None
-    exclude: bool | None
 
 
 class ResultSummaryReturnType(BaseModel):
@@ -141,7 +141,6 @@ class ResultReturnType(BaseModel):
     dose_response: list[DoseResponseReturnType] | None
     compound: CompoundReturnType | None
     protein: ProteinReturnType | None
-    well_volume: int | None
     protein_concentration: float | None
 
 
@@ -160,14 +159,12 @@ class ExperimentSummaryReturnType(BaseModel):
     centrifuge_minutes: int | None
     centrifuge_rpm: int | None
     protein_days_thawed: int | None
-    # well_volume: int | None
 
 
 class ExperimentDetailReturnType(BaseModel):
     id: int
     plates: list[Plate]
     results: list[ResultReturnType]
-    binding_experiments: list["BindingExperiment"]
     start_date: datetime.datetime | None
     dispense_assay_mix: AssayMixDispenseMethod | None
     dispense_ligands: LigandDispenseMethod | None

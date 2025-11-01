@@ -12,7 +12,6 @@ export default function AbsorbancePlot(props) {
   const width = 400 - margin.left - margin.right;
   const height = 200 - margin.top - margin.bottom;
 
-  console.log(props.data)
 
   useEffect(() => {
     if (props?.data?.length > 0) {

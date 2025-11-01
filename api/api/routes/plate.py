@@ -10,7 +10,7 @@ router = APIRouter()
 @router.get("/")
 @router.get("/{id}")
 def get_plate(
-    id: str | None = None,
+    id: int | None = None,
     experiment: int | None = None,
 ) -> list[PlateReturnType]:
     query = select(Plate)

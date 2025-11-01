@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import './Plate.css';
 import PropTypes from 'prop-types';
 import Well from './Well.jsx';
+import Chip from '../UI/Chip.jsx';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleCheck, faCalendar, faFlask, faVial, faRotate, faVialCircleCheck } from
+  '@fortawesome/free-solid-svg-icons'
 
 function PlateArray(props) {
   const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
@@ -24,11 +28,11 @@ function PlateArray(props) {
   return (
     <div className='plate-array-area'>
       <select onChange={event => { setColorBy(event.target.value) }} value={colorBy} >
-        <option value='volume'>volume</option>
-        <option value='compound_concentration'>compound_concentration</option>
-        <option value='protein_concentration'>protein_concentration</option>
-        <option value='total_volume'>total_volume</option>
-        <option value='result_id'>result_id</option>
+        <option value='volume'>Volume</option>
+        <option value='compound_concentration'>Compound Concentration</option>
+        <option value='protein_concentration'>Protein Concentration</option>
+        <option value='total_volume'>Total Volume</option>
+        <option value='result_id'>Result Id</option>
       </select>
       <table>
         <tbody>
@@ -71,19 +75,14 @@ export default function Plate(props) {
   ]
   return (
     <div className='plate'>
-      <div className='--plate-row'>
-        <table>
-          <tbody>
-            {
-              params.map((item, idx) => (
-                <tr key={idx} >
-                  <th key={`th-${idx}`}> {item} </th>
-                  <td key={`td-${idx}`}> {props[item] || ''} </td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
+      <div className='row'>
+        <div className='column'>
+          {params.map((item, idx) => <Chip key={idx} style={{ backgroundColor: `var(--gruv-${idx + 15})` }} label={<span>{item} {props[item]}</span>}
+            icon={
+              <FontAwesomeIcon style={{ color: 'var(--gruv-1)' }} icon={faFlask} />}
+          />)
+          }
+        </div>
         <PlateArray id={props.id} />
       </div>
     </div >

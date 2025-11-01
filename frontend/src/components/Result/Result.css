@@ -1,16 +1,14 @@
 .result-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: space-between;
-
+  width: 100%;
   min-width: fit-content;
-  width: 90%;
   height: fit-content;
+  display: flex;
+  flex-direction: column; /* Stack items vertically by default */
+  flex-wrap: wrap;
+  padding: 10px;
+  align-content: space-between;
+  gap: 32px;
 
-  padding: 0px; 
-  margin-top: 20px; 
-
-  border: 1px solid var(--border-color); 
   border-radius: 4px; 
 }
 
@@ -25,15 +23,6 @@
   height: fit-content;
 }
 
-.compound-container {
-  
-}
-.result-container {
-  display: flex;
-  flex-direction: column; /* Stack items vertically by default */
-  padding: 20px;
-  width: 1000px;
-}
 
 .compound-container {
   margin-bottom: 20px; /* Add space below the compound info */
@@ -41,16 +30,15 @@
 
 .main-content {
   display: flex; /* Arrange table and plots horizontally */
-  flex-wrap: nowrap;
-  flex-shrink: 4;
-  flex-grow: 4;
-  flex-basis: auto;
-  gap: 20px; /* Space between the table and the plots */
+  min-width: fit-content;
+  width: 100%;
+  height: fit-content;
+  flex-direction: row;
+  justify-content: space-between;
   /* border: 1px solid #ddd;  */
   /* border-radius: 4px;  */
   padding: 12px;
-  width: fit-content;
-  min-width: 1000px;
+  margin: 12px;
 }
 
 
@@ -72,7 +60,6 @@
   border: 1px solid #eee;
   padding: 15px;
   border-radius: 5px;
-  background-color: white;
 }
 
 .absorbance-plot-container {
@@ -80,7 +67,6 @@
   border: 1px solid #eee;
   padding: 15px;
   border-radius: 5px;
-  background-color: white;
 }
 
 /* You might need to adjust styling for the ResultResponseTable as well */
@@ -99,20 +85,17 @@
 }
 
 .response-table th {
-  background-color: #f0f0f0;
   font-weight: bold;
 }
 
-.response-table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
 
 .result-nav {
   width: 100%;
+  height: fit-content;
   margin: 0;
   background-color: var(--bg-dark);
   border: 1px solid var(--bg);
-  height: 48px;
+  border-radius: 4px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -132,13 +115,25 @@
 }
 
 .result-nav-item {
-  width: 24px;
-  min-height: 42px;
-  background-color: #fe8019;
+  width: 128px;
+  min-height: 3em;
+  margin: 7px;
+  color: var(--fg);
+  background-color: var(--gruv-11);
+  border: 1px solid var(--bg);
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
 }
 
 .result-nav-item:hover {
-  background-color: #9d0006;
+  background-color: var(--gruv-16);
+}
+
+.result-nav-item:active {
+  background-color: var(--gruv-14);
 }
 
 .comment-container {
