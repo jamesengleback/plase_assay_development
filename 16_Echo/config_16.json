@@ -1,5 +1,6 @@
 {
     "experiment_number": 16,
+    "start_date": "2019-11-01",
     "protein_days_thawed": 0,
     "centrifuge_rpm": 2,
     "centrifuge_minutes": 3700,
@@ -731,14 +732,14 @@
             "% DMSO": 5.0,
             "well_volume": 40.0,
             "concentrations": [
-                0.0,
-                0.21,
-                3.33,
-                16.87,
-                53.31,
-                130.15,
+                500.0,
                 269.89,
-                500.0
+                130.15,
+                53.31,
+                16.87,
+                3.33,
+                0.21,
+                0.0
             ]
         }
     },

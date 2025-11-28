@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.get("/")
-def get_results(
+async def get_results(
     common_parameters: Annotated[dict, Depends(common_parameters)],
     id: int | None = None,
     experiment_id: float | None = None,
@@ -48,7 +48,7 @@ def get_results(
 
 
 @router.get("/{id}")
-def get_result(
+async def get_result(
     id: int | None = None, session: Session = Depends(get_session)
 ) -> ResultDetailReturnType:
 
@@ -85,7 +85,7 @@ def get_result(
 
 
 @router.patch("/{id}")
-def patch_result(
+async def patch_result(
     id: int | None,
     accept: Annotated[bool | None, Form()] = None,
     lock: Annotated[bool | None, Form()] = None,
@@ -93,7 +93,7 @@ def patch_result(
     exclude_id: Annotated[int | None, Form()] = None,
     exclude: Annotated[bool | None, Form()] = None,
     session: Session = Depends(get_session),
-) -> ResultDetailReturnType | None:
+) -> ResultReturnType | None:
 
     result = session.get(Result, id)
 

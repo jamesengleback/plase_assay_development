@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.get("/")
-def get_protein(
+async def get_protein(
     common_parameters: Annotated[dict, Depends(common_parameters)],
     id: int | None = None,
     session: Session = Depends(get_session),

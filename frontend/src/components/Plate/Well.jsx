@@ -74,7 +74,6 @@ export default function Well(props) {
   //const color = color_ // hate this
 
   let backgroundColor;
-  console.log(props)
 
   switch (props.color) {
     case 'compound_concentration':

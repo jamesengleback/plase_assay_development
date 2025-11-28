@@ -6,8 +6,6 @@ file,ligand,vmax,km,r_squared,experiment_number
 ./19_Validation/TitrationData/20191204_Lauric_Titration_1.csv,Lauric Acid,0.04229508577607224,1399.2876929786141,0.9756909727109333,19
 ./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_lauric_acid2.csv,Lauric Acid,0.007106786794857371,1.428215185006465e-12,-0.4144877054791556,13
 ./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_lauric_acid1.csv,Lauric Acid,0.03488898885283006,784.9218403790559,0.8889481878407413,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_palmOH2.csv,Palmitic Acid,0.08769729273788401,6442.483777239681,0.7426225233507453,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_palmOH1.csv,Palmitic Acid,0.628389405878746,5378.4656229265,0.3366239629699733,13
 ./19_Validation/TitrationData/20191128_PalmiticAcid_BM3WT_Titration_4.csv,Palmitic Acid,0.18968945900202455,6.994393732082645,0.9699354622671718,19
 ./19_Validation/TitrationData/20191128_PalmiticAcid_BM3WT_Titration_1.csv,Palmitic Acid,0.1939339453032838,13.08247463822539,0.9953868734466477,19
 ./19_Validation/TitrationData/20191128_PalmiticAcid_BM3WT_Titration_3.csv,Palmitic Acid,0.1606457219648364,9.968651623181607,0.9157676264946591,19
@@ -22,18 +20,8 @@ file,ligand,vmax,km,r_squared,experiment_number
 ./18_BuffersNCompounds/Model/20191122_ArachadonicaAcid_BM3WT_Titration_4.csv,Arachadonic Acid,0.2472305980739944,115.74785833752529,0.9990327870012106,18
 ./18_BuffersNCompounds/Model/20191122_ArachadonicaAcid_BM3WT_Titration_5.csv,Arachadonic Acid,0.22834783347652746,115.68718986605977,0.9969497887254372,18
 ./18_BuffersNCompounds/Model/20191122_ArachadonicaAcid_BM3WT_Titration_2.csv,Arachadonic Acid,0.24272857440835016,114.01738729161397,0.9997500172006072,18
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-ARACHADONICACID1_saraharadidmostofit.csv,Arachadonic Acid,0.5681880152243289,1700.6941835057944,0.9713452013527303,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-ARACHADONICACID1_saharadidntdoanyofit3.csv,Arachadonic Acid,0.2964373287493475,491.8545281967457,0.9904881050526492,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191001_BM3WT_Arachadonic_1.csv,Arachadonic Acid,0.05689113226696912,14.782293139066246,0.86908208679024,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_pjhenylimidazole1.csv,4-Phenylimidazole,0.01579744130472573,1.3432331877522241,0.999998304572119,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_pjhenylimidazole2.csv,4-Phenylimidazole,0.02162777074857949,20.694162887348792,0.9344874806370801,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_pjhenylimidazole3.csv,4-Phenylimidazole,0.017218140649955384,3.9525458604729238,0.9607163344477722,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_pjhenylimidazole4.csv,4-Phenylimidazole,0.012435212710772863,1.9468373497998894,0.9961687555564257,13
 ./19_Validation/TitrationData/20191128_4PHENYLIMIDAZOLE_BM3WT_Titration_1.csv,4-Phenylimidazole,0.06469341387869537,8.430107563199885,-4.25138534981071,19
 ./19_Validation/TitrationData/20191128_4PHENYLIMIDAZOLE_BM3WT_Titration_2.csv,4-Phenylimidazole,0.03772174872412278,6.644933866694563,0.9904343978421059,19
 ./19_Validation/TitrationData/20191128_4PHENYLIMIDAZOLE_BM3WT_Titration_3.csv,4-Phenylimidazole,0.048763264653678765,0.5878124463988874,0.015068075665228609,19
 ./19_Validation/TitrationData/20191128_4PHENYLIMIDAZOLE_BM3WT_Titration_4.csv,4-Phenylimidazole,0.04218344389023979,7.852074922400236,0.9932833076988752,19
 ./19_Validation/TitrationData/20191128_4PHENYLIMIDAZOLE_BM3WT_Titration_5.csv,4-Phenylimidazole,0.03670671136708058,6.7269076948594115,0.9901354094680673,19
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_sds3.csv,Sodium Dodecyl Sulfate,0.6509151312100482,3597.9784537137425,0.7204733457067634,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_sds1.csv,Sodium Dodecyl Sulfate,0.11274199923131661,445.79560341766916,0.9913663181994574,13
-./13_TitrationValidationPilot/20191010_test/titrations/20191010-BM3-wt-4_sds2.csv,Sodium Dodecyl Sulfate,0.6176080783793702,3452.290891721071,0.7051802283835232,13

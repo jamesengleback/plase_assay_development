@@ -7,11 +7,10 @@ def bmg(path: str) -> pd.DataFrame | None:
         # find header
         with open(path, 'r') as f:
             for row_num, row in enumerate(f):
-                if len(row.split(',')) > 500 or 'Well Row' in row:
+                # if len(row.split(',')) > 500 or 'Well Row' in row:
+                if '800' in row:
                     break
         df = pd.read_csv(path, skiprows=row_num)
-        # drop 'Unnamed' column
-        df = df.loc[:, df.columns.str.contains('Unnamed') == False]
         if 'Well Row' in df.columns:
             df.index = [f'{i}{j}'.replace('.0', '') for i, j in zip(df['Well Row'],
                                                                     df['Well Col'])
@@ -31,6 +30,13 @@ def bmg(path: str) -> pd.DataFrame | None:
             df.index = wells
             df.columns = wavelengths
             df = df.iloc[1:, 2:]
+        else:
+            if df.iloc[:, 0].str.contains('[A-Z]').all() and df.iloc[:, 1].dtype == int:
+                df.index = [f'{i}{j}' for i, j in zip(df.iloc[:, 0], df.iloc[:, 1])]
+
+        # drop 'Unnamed' column
+        df = df.loc[:, df.columns.str.contains('Unnamed') == False]
+        df = df.loc[:, df.columns.str.contains('^[0-9]+$')]
         df.columns = df.columns.astype(int)
         return df
     except Exception as e:

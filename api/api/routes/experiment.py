@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/")
-def get_experiments(
+async def get_experiments(
     common_parameters: Annotated[dict, Depends(common_parameters)],
     session: Session = Depends(get_session),
     id: str | None = None,
@@ -22,7 +22,7 @@ def get_experiments(
 
 
 @router.get("/{id}")
-def get_experiment(
+async def get_experiment(
     common_parameters: Annotated[dict, Depends(common_parameters)],
     session: Session = Depends(get_session),
     id: str | None = None,

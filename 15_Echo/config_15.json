@@ -1,5 +1,6 @@
 {
         "experiment_number": 15,
+        "start_date": "2019-10-23",
         "centrifuge_minutes": 3700,
         "centrifuge_rpm": 2,
         "dispense_bulk": "Thermo Multidrop Combi",

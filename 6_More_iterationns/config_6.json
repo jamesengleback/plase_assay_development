@@ -1,5 +1,6 @@
 {
     "experiment_number": 6,
+    "start_date": "2019-06-20",
     "well_volume": 50,
     "protein_concentration": 3.86,
     "plate_type": "corning 3660",
@@ -24,14 +25,14 @@
         "P"
     ],
     "concentrations": [
-        0.0,
-        7.8125,
-        15.625,
-        31.25,
-        62.5,
-        125.0,
+        500.0,
         250.0,
-        500.0
+        125.0,
+        62.5,
+        31.25,
+        15.625,
+        7.8125,
+        0.0
     ],
     "protein_days_thawed": 0,
     "experiments": {

@@ -6,6 +6,23 @@ import Chip from '../UI/Chip.jsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleCheck, faCalendar, faFlask, faVial, faRotate, faVialCircleCheck } from
   '@fortawesome/free-solid-svg-icons'
+import infernoScale from '../Absorbance/colors.jsx';
+
+
+function capitalizeWords(str) {
+  if (!str) {
+    return str;
+  }
+
+  return str.trim().split(/\s+/).map(word => {
+    // Handle empty strings that might result from extra spaces
+    if (word.length === 0) {
+      return '';
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+}
+
 
 function PlateArray(props) {
   const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
@@ -14,6 +31,8 @@ function PlateArray(props) {
 
   const [wells, setWells] = useState([])
   const [colorBy, setColorBy] = useState('compound_concentration')
+  const [colorScaleNumbers, setColorScaleNumbers] = useState([])
+  const [unit, setUnit] = useState('μM')
 
   useEffect(() => {
     fetch(`http://localhost:8008/well/?plate=${props.id}`)
@@ -24,11 +43,26 @@ function PlateArray(props) {
   }, [])
   //const wells = Object.fromEntries(props?.wells.map(item => [item?.address, item]))
 
+  useEffect(() => {
+    console.log('wells: ', wells)
+    let colorScaleNumbers
+    switch (colorBy) {
+      case 'compound_concentration':
+        colorScaleNumbers = [...new Set(Object.values(wells).map(item => item?.compound_concentration))].toSorted((a, b) => a > b)
+        setColorScaleNumbers(colorScaleNumbers)
+        setUnit('μM')
+        break;
+      case 'protein_concentration':
+        colorScaleNumbers = [...new Set(Object.values(wells).map(item => item?.protein_concentration))].toSorted((a, b) => a > b)
+        setColorScaleNumbers(colorScaleNumbers)
+        setUnit('μM')
+        break
+    }
+  }, [colorBy, props.id])
 
   return (
     <div className='plate-array-area'>
       <select onChange={event => { setColorBy(event.target.value) }} value={colorBy} >
-        <option value='volume'>Volume</option>
         <option value='compound_concentration'>Compound Concentration</option>
         <option value='protein_concentration'>Protein Concentration</option>
         <option value='total_volume'>Total Volume</option>
@@ -59,6 +93,17 @@ function PlateArray(props) {
           }
         </tbody>
       </table>
+      <div style={{ display: 'flex', flexDirection: 'column', margin: '0.5em' }}>
+        <div>{capitalizeWords(colorBy.replace('_', ' '))} ({unit}): </div>
+        <div style={{ display: 'flex', flexDirection: 'row', padding: '0.5em' }}>
+          {colorScaleNumbers.map((item, idx) => (
+            <div key={idx}>
+              <div style={{ width: '80px', height: '20px', backgroundColor: infernoScale(item / Math.max(...colorScaleNumbers)) }}></div>
+              <div >{item.toFixed(1)}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

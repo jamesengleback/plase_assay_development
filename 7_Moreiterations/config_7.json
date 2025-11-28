@@ -1,5 +1,6 @@
 {
     "experiment_number": 7,
+    "start_date": "2019-06-22",
     "well_volume": 50,
     "protein_concentration": 3.80,
     "test_rows": [

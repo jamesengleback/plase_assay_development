@@ -59,12 +59,13 @@ export default function ExperimentPage(props) {
                 <th>V<sub>max</sub></th>
                 <th>K<sub>m</sub></th>
                 <th>R<sup>2</sup></th>
-                <th>Checked</th>
+                <th>Locked</th>
                 <th>Accepted</th>
                 <th>Compound</th>
                 <th>Protein</th>
                 <th>Well Volume</th>
                 <th>[Protein]</th>
+                <th>Annotations</th>
               </tr>
             </thead>
             <tbody>
@@ -76,16 +77,17 @@ export default function ExperimentPage(props) {
                   <td>{result.vmax ? result.vmax.toFixed(3) : 'N/A'}</td>
                   <td>{result.km ? result.km.toFixed(3) : 'N/A'}</td>
                   <td>{result.r_squared ? result.r_squared.toFixed(3) : 'N/A'}</td>
-                  <td>{result.checked ? <span>
+                  <td>{result.locked ? <span>
                     <FontAwesomeIcon style={{ color: '#72ff72' }} icon={faCircleCheck} />
                   </span> : <></>}</td>
                   <td>{result.accepted ? <span>
                     <FontAwesomeIcon style={{ color: '#72ff72' }} icon={faCircleCheck} />
                   </span> : <></>}</td>
-                  <td>{result.compound.name}</td>
-                  <td>{result.protein.name}</td>
+                  <td>{result.compound?.name}</td>
+                  <td>{result.protein?.name}</td>
                   <td>{result.well_volume}</td>
                   <td>{result.protein_concentration}</td>
+                  <td>{result.annotations.map(i => i.comment).join(' / ')}</td>
                 </tr>)
               }
             </tbody>

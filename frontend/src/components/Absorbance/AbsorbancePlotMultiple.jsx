@@ -5,6 +5,8 @@ import infernoScale, { responsePlotColors } from './colors.jsx';
 
 export default function AbsorbancePlotMultiple({ data, result }) {
   // console.log(result.dose_response)
+  // console.log(data)
+  // console.log(result)
   const excludeDict = result?.dose_response && Object.fromEntries(result?.dose_response?.map(i => [i.concentration, i.exclude]))
   const svgRef = useRef();
   const margin = { top: 20, right: 30, bottom: 45, left: 60 };
@@ -47,8 +49,10 @@ export default function AbsorbancePlotMultiple({ data, result }) {
       .domain([limits.xMin, limits.xMax])
       .range([0, width]);
 
+    const a420 = data.map(d => d.absorbance.filter(a => a.wavelength === 420).map(a => a.absorbance)).flat()
+    const a420Mean = a420.reduce((a, b) => a + b, 0) / data.length
     const yScale = d3.scaleLinear()
-      .domain([limits.yMin * 1.1, limits.yMax * 1.1])
+      .domain([Math.min(limits.yMin * 1.1, 0), Math.abs(a420Mean) * 2])
       .range([height, 0]);
 
     newG.append('g')
@@ -152,7 +156,7 @@ export default function AbsorbancePlotMultiple({ data, result }) {
         .style('fill', responsePlotColors.fg)
     }
 
-  }, [data]);
+  }, [data, result]);
 
   return (
     <>

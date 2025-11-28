@@ -10,7 +10,7 @@ router = APIRouter()
 
 @router.get("/")
 @router.get("/{id}")
-def get_well(
+async def get_well(
     id: str | None = None,
     plate: int | None = None,
 ) -> list[WellReturnType]:
@@ -26,7 +26,7 @@ def get_well(
 
 
 @router.get("/{id}/detail")
-def get_well_detail(id: int) -> WellDetailReturnType:
+async def get_well_detail(id: int) -> WellDetailReturnType:
     with Session(engine) as session:
         # well = session.get(Well, id)
         query = (

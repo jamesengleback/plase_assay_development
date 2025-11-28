@@ -1,5 +1,6 @@
 {
     "experiment_number": 18,
+    "start_date": "2019-11-21",
     "protein_days_thawed": 0,
     "centrifuge_rpm": 2,
     "centrifuge_minutes": 3700,

@@ -3,7 +3,7 @@ import datetime
 from pydantic import BaseModel
 from ..model import (
     Absorbance,
-    AssayMixDispenseMethod,
+    # AssayMixDispenseMethod,
     DoseResponse,
     Experiment,
     LigandDispenseMethod,
@@ -154,7 +154,8 @@ class ExperimentSummaryReturnType(BaseModel):
     plates: list[Plate]
     results: list[ResultReturnType]
     # binding_experiments: list["BindingExperiment"]
-    dispense_assay_mix: AssayMixDispenseMethod | None
+    # dispense_assay_mix: AssayMixDispenseMethod | None
+    dispense_assay_mix: str | None
     dispense_ligands: LigandDispenseMethod | None
     centrifuge_minutes: int | None
     centrifuge_rpm: int | None
@@ -166,7 +167,8 @@ class ExperimentDetailReturnType(BaseModel):
     plates: list[Plate]
     results: list[ResultReturnType]
     start_date: datetime.datetime | None
-    dispense_assay_mix: AssayMixDispenseMethod | None
+    dispense_assay_mix: str | None
+    # dispense_assay_mix: AssayMixDispenseMethod | None
     dispense_ligands: LigandDispenseMethod | None
     centrifuge_minutes: int | None
     centrifuge_rpm: int | None

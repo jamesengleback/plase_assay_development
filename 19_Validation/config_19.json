@@ -1,5 +1,6 @@
 {
     "experiment_number": 19,
+    "start_date": "2019-11-27",
     "centrifuge_minutes": 2,
     "centrifuge_rpm": 3700,
     "dispense_bulk": "Manual",

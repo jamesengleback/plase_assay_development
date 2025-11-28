@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import { ResultTable } from './Result';
 import ResultResponseTable from './ResultResponseTable';
@@ -31,9 +32,15 @@ import { ResultContext } from './ResultContext';
 import ResultNavigation from './ResultNavigation';
 
 
-
-
-
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre style={{ color: 'red' }}>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
+}
 
 export default function ResultPage(props) {
   const [loading, setLoading] = useState(true);
@@ -44,6 +51,12 @@ export default function ResultPage(props) {
   const { id } = useParams();
 
   const getTestMinusControl = (testWells, controlWells) => {
+    if (testWells === undefined || testWells.length === 0) {
+      return controlWells
+    } else if (controlWells === undefined || controlWells.length === 0) {
+      return testWells
+    }
+
     const concs = Array.from(new Set(controlWells
       .map(item => item.compound_concentration)
       .concat(testWells
@@ -51,11 +64,13 @@ export default function ResultPage(props) {
       )
     )
     )
+    
+
     const testMinusControl = concs.map(conc => {
       const controlWell = controlWells.filter(item => item.compound_concentration === conc)[0];
       const testWell = testWells.filter(item => item.compound_concentration === conc)[0];
-      const correctedAbsorbance = testWell.absorbance.map(item => {
-        const controlAbsorbance = controlWell.absorbance.filter(item_ => item.wavelength === item_.wavelength)[0]
+      const correctedAbsorbance = testWell.absorbance?.map(item => {
+        const controlAbsorbance = controlWell.absorbance?.filter(item_ => item.wavelength === item_.wavelength)[0]
         return { ...controlAbsorbance, absorbance: item.absorbance - controlAbsorbance.absorbance }
       }
       );
@@ -136,7 +151,10 @@ export default function ResultPage(props) {
         {/* </div> */}
         <div className='col' style={{ alignItems: 'flex-end', padding: '1em' }}>
           <div className='main-content'>
-            <AbsorbancePlotMultiple data={wellSelection} result={result} />
+            <ErrorBoundary
+              fallback={ErrorFallback}>
+              <AbsorbancePlotMultiple data={wellSelection} result={result} />
+            </ErrorBoundary>
             <div className='col'>
               <div>
                 {

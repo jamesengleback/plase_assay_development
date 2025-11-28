@@ -1,5 +1,6 @@
 {
     "experiment_number": 14,
+    "start_date": "2019-10-18",
     "well_volume": 50,
     "test_rows": [
         "A",

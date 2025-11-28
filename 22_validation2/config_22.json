@@ -1,5 +1,6 @@
 {
     "experiment_number": 22,
+    "start_date": "2020-10-13",
     "protein_days_thawed": 0,
     "dispense_ligands": "Serial dilution",
     "bulk_dispensing": "Manual",

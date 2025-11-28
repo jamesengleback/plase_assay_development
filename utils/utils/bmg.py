@@ -7,7 +7,8 @@ def parse_bmg(path: str) -> pd.DataFrame:
         # find header
         with open(path, 'r') as f:
             for row_num, row in enumerate(f):
-                if len(row.split(',')) > 500 or 'Well Row' in row:
+                # if len(row.split(',')) > 500 or 'Well Row' in row:
+                if '800' in row:
                     break
         df = pd.read_csv(path, skiprows=row_num)
         # drop 'Unnamed' column

@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.get("/")
 @router.get("/{id}")
-def get_absorbance(
+async def get_absorbance(
     id: str | None = None,
     well_id: int | None = None,
 ) -> list[AbsorbanceReturnType]:

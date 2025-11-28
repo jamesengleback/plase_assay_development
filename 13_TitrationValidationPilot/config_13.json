@@ -1,5 +1,6 @@
 {
     "experiment_number": 13,
+    "start_date": "2019-10-08",
     "well_volume": 50,
     "test_rows": [
         "A",
@@ -34,8 +35,8 @@
     "experiments": {
         "plate_1": {
             "file": "20191008_test/20191008/20191008_.CSV",
-            "protein_days_thawed": "?",
-            "protein_concentration": "?",
+            "protein_days_thawed": null,
+            "protein_concentration": null,
             "plate_type": "Thermo Polystyrene (262160)",
             "columns": {
                 "1": "DMSO",
@@ -60,7 +61,7 @@
         "plate_2": {
             "file": "20191010_test/20191010.CSV",
             "plate_type": "Thermo Polystyrene (262160)",
-            "protein_days_thawed": "?",
+            "protein_days_thawed": null,
             "protein_concentration": 2.4,
             "columns": {
                 "1": "DMSO",

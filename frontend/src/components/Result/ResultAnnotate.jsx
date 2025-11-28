@@ -40,6 +40,8 @@ export default function ResultAnnotate(props) {
 
   useEffect(() => {
     setComments(props.annotations)
+    setAccepted(props.accepted)
+    setLocked(props.locked)
   }, [props]);
 
   // useEffect(() => {

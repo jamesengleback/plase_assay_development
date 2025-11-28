@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.get("/")
 @router.get("/{id}")
-def get_plate(
+async def get_plate(
     id: int | None = None,
     experiment: int | None = None,
 ) -> list[PlateReturnType]:

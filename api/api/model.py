@@ -139,12 +139,8 @@ class WellResultLink(SQLModel, table=True):
 
 class Result(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-
     # binding_experiment_id: int | None = Field(foreign_key='bindingexperiment.id')
     # binding_experiment: 'BindingExperiment' = Relationship(back_populates='result')
-
-
-
     # result: Result | None = Relationship(back_populates='binding_experiment')
     # well_volume: int | None
     compound: Compound | None = Relationship()
@@ -158,7 +154,7 @@ class Result(SQLModel, table=True):
     protein: Protein | None = Relationship()
     protein_concentration: float | None
     protein_id: int | None = Field(foreign_key="protein.id")
-    result_id: int | None = Field(foreign_key="result.id")
+    # result_id: int | None = Field(foreign_key="result.id")
     wells: list[Well] | None = Relationship(link_model=WellResultLink)
 
     k: float | None
@@ -172,8 +168,8 @@ class Result(SQLModel, table=True):
     # std_405: float | None
     # dd_soret: float | None
 
-    locked: bool | None
-    accepted: bool | None
+    locked: bool | None = False
+    accepted: bool | None = False
     annotations: list["ResultAnnotation"] = Relationship(back_populates="result")
     dose_response: list[DoseResponse] = Relationship(back_populates="result")
 
@@ -190,9 +186,10 @@ class LigandDispenseMethod(Enum):
     serial_dilution = "serial_dilution"
 
 
-class AssayMixDispenseMethod(Enum):
-    electronic_multichannel_pipette = "electronic_multichannel_pipette"
-    peristaltic_pump = "multidrop"
+# class AssayMixDispenseMethod(Enum):
+#     electronic_multichannel_pipette = "electronic_multichannel_pipette"
+#     peristaltic_pump = "multidrop"
+#     plate_reader_injector = "multidrop"
 
 
 class Experiment(SQLModel, table=True):
@@ -202,7 +199,8 @@ class Experiment(SQLModel, table=True):
     results: list[Result] = Relationship(back_populates="experiment")
 
     start_date: datetime.datetime | None
-    dispense_assay_mix: AssayMixDispenseMethod | None
+    dispense_assay_mix: str | None
+    # dispense_assay_mix: AssayMixDispenseMethod | None
     dispense_ligands: LigandDispenseMethod | None
     centrifuge_minutes: int | None
     centrifuge_rpm: int | None
