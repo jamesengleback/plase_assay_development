@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import './Protein.css'; // Assuming you'll name your CSS file this
+import styles from './Protein.module.css'; // Assuming you'll name your CSS file this
 
 const AAColors = {
     A: '#c4bfb7',
@@ -27,7 +27,7 @@ const AAColors = {
 
 function Tooltip({ label }) {
     console.warn(label);
-    return <div className="tooltip"> {label} </div>;
+    return <div className={styles.tooltip}> {label} </div>;
 }
 
 Tooltip.propTypes = {
@@ -48,7 +48,7 @@ function AA({ id, letter }) {
     return (
         <div
             id={id}
-            className="amino-acid"
+            className={styles.aminoAcid}
             style={isHovered ? aaHighlightStyle : aaStyle}
             onMouseOver={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -66,7 +66,7 @@ AA.propTypes = {
 
 function Sequence({ sequence }) {
     return (
-        <div className="sequence">
+        <div className={styles.sequence}>
             {sequence ? (
                 sequence.split('').map((aa, idx) => (
                     <AA
@@ -84,13 +84,11 @@ Sequence.propTypes = {
     sequence: PropTypes.string,
 };
 
-export default function ProteinCard({ name, accession, species, sequence }) {
+export default function ProteinCard({ name, sequence }) {
     return (
-        <div className="info-card">
-            <div className="protein-header">
-                <h5 className="protein-name"> Name: <span className="protein-value"> {name} </span> </h5>
-                <h5 className="protein-accession"> Accession: <span className="protein-value"> {accession} </span> </h5>
-                <h5 className="protein-species"> Species: <span className="protein-value"> {species} </span></h5>
+        <div className='info-card'>
+            <div className={styles.proteinHeader}>
+                <h5 className={styles.proteinName}> Name: <span className={styles.proteinValue}> {name} </span> </h5>
             </div>
             <div>
                 <Sequence sequence={sequence} />
@@ -101,6 +99,5 @@ export default function ProteinCard({ name, accession, species, sequence }) {
 
 ProteinCard.propTypes = {
     name: PropTypes.string.isRequired,
-    accession: PropTypes.string,
-    species: PropTypes.string,
+    sequence: PropTypes.string,
 }

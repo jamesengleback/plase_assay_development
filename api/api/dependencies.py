@@ -4,7 +4,8 @@ from fastapi import Depends
 from .model import engine
 
 
-def common_parameters(offset: int = 0, limit: int = 100):
+def common_parameters(page: int = 1, limit: int = 100):
+    offset = (page - 1) * limit
     return {"offset": offset, "limit": limit}
 
 

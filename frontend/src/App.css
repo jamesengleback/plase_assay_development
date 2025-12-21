@@ -144,6 +144,7 @@ a:hover {
   width: 95vw;
   padding: 1rem;
   text-align: center;
+  margin-top: 2.5em;
   /* background-color: var(--bg); */
 }
 
@@ -164,7 +165,7 @@ button {
 }
 
 .info-card {
-  width: 320px;
+  width: 520px;
   max-height: 320px;
   height: fit-content;
   border: 1px solid var(--border-color);
@@ -234,7 +235,7 @@ button {
    h1 {
     font-size: 1.8em;
     margin-bottom: 15px;
-    text-align: center;
+    text-align: left;
   };
 
    table {
@@ -282,5 +283,17 @@ button {
   td li:last-child {
     margin-right: 0;
   }
+}
+
+.experiment-link {
+  text-decoration: none !important;
+}
+
+.experiment-link:hover .experiment {
+  background-color: var(--gruv-3);
+}
+
+.experiment-link h1 {
+  text-decoration: none !important;
 }
 

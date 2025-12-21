@@ -1,10 +1,10 @@
 import React from 'react'
-import './Chip.css'
+import styles from './Chip.module.css'
 
 export default function Chip(props) {
     const { icon, label, other } = props
     return (
-        <div className='chip' {...props}>
+        <div className={styles.chip} {...props}>
             {
                 icon ?
                     icon : null

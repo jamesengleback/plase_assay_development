@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Plate from './Plate'
+import Plate from '../components/Plate/Plate'
 
 export default function Plates() {
   const [plates, setPlates] = useState([])

@@ -16,3 +16,5 @@ db-checkpoints/
 *bun.lockb
 *package-lock.json
 utils/build
+.vscode/*
+.vscode/

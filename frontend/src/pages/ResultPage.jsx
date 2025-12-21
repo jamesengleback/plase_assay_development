@@ -3,33 +3,18 @@ import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { ResultTable } from './Result';
-import ResultResponseTable from './ResultResponseTable';
-import AbsorbancePlotMultiple from '../Absorbance/AbsorbancePlotMultiple';
-import Compound from '../Compound/Compound';
-import ProteinCard from '../Protein/ProteinCard';
-import ResponsePlot from './ResponsePlot';
-import ResultAnnotate from './ResultAnnotate';
-import ResultTitle from './ResultTitle';
-import Spinner from '../utils/Spinner/Spinner';
+import { ResultTable } from '../components/Result/Result';
+import ResultResponseTable from '../components/Result/ResultResponseTable';
+import AbsorbancePlotMultiple from '../components/Absorbance/AbsorbancePlotMultiple';
+import Compound from '../components/Compound/Compound';
+import ProteinCard from '../components/Protein/ProteinCard';
+import ResponsePlot from '../components/Result/ResponsePlot';
+import ResultAnnotate from '../components/Result/ResultAnnotate';
+import ResultTitle from '../components/Result/ResultTitle';
+import Spinner from '../components/utils/Spinner/Spinner';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faChevronRight,
-  faChevronLeft,
-  faDeleteLeft,
-  faComment,
-  faSquareCheck,
-  faHourglassStart,
-  faLock,
-  faLockOpen,
-  faCheckCircle,
-  faCircleXmark,
-} from '@fortawesome/free-solid-svg-icons'
-
-import './Result.css'
-import { ResultContext } from './ResultContext';
-import ResultNavigation from './ResultNavigation';
+import { ResultContext } from '../components/Result/ResultContext';
+import ResultNavigation from '../components/Result/ResultNavigation';
 
 
 function ErrorFallback({ error, resetErrorBoundary }) {
@@ -42,9 +27,8 @@ function ErrorFallback({ error, resetErrorBoundary }) {
   );
 }
 
-export default function ResultPage(props) {
-  const [loading, setLoading] = useState(true);
-  const [plotLoading, setPlotLoading] = useState(false);
+export default function ResultPage() {
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState({});
   const [wellSelectionKey, setWellSelectionKey] = useState('test-minus-control')
   const [wellSelection, setWellSelection] = useState([])
@@ -64,14 +48,19 @@ export default function ResultPage(props) {
       )
     )
     )
-    
+
 
     const testMinusControl = concs.map(conc => {
       const controlWell = controlWells.filter(item => item.compound_concentration === conc)[0];
       const testWell = testWells.filter(item => item.compound_concentration === conc)[0];
       const correctedAbsorbance = testWell.absorbance?.map(item => {
         const controlAbsorbance = controlWell.absorbance?.filter(item_ => item.wavelength === item_.wavelength)[0]
-        return { ...controlAbsorbance, absorbance: item.absorbance - controlAbsorbance.absorbance }
+        if (typeof controlAbsorbance === 'undefined') {
+          return item
+
+        } else {
+          return { ...controlAbsorbance, absorbance: item.absorbance - controlAbsorbance.absorbance }
+        }
       }
       );
       return { ...testWell, absorbance: correctedAbsorbance }
@@ -127,16 +116,17 @@ export default function ResultPage(props) {
       .then(res => res.json())
       .then(json => {
         setResult(json);
-        setLoading(false);
         return json
       })
       .then(result => {
         const testWells = result.wells?.filter(item => item.protein_concentration > 0)
         const controlWells = result.wells?.filter(item => item.protein_concentration === 0)
         setWellSelection(getTestMinusControl(testWells, controlWells))
+        setLoading(false);
       })
       .catch(err => {
         console.error(err);
+        setLoading(false);
       })
   }, [id])
 
@@ -144,23 +134,16 @@ export default function ResultPage(props) {
     <ResultContext.Provider value={{ ...result, setResult: setResult }}>
       <div className='result-container'>
         <ResultNavigation {...result} />
-        {loading ?? <Spinner />}
-        {/* <div className='row' style={{ justifyContent: 'space-between' }}> */}
-        {/*   <ResultTitle {...result} /> */}
-        {/*   <ResultAnnotate checked={result.checked} accepted={result.accepted} /> */}
-        {/* </div> */}
-        <div className='col' style={{ alignItems: 'flex-end', padding: '1em' }}>
-          <div className='main-content'>
-            <ErrorBoundary
-              fallback={ErrorFallback}>
-              <AbsorbancePlotMultiple data={wellSelection} result={result} />
-            </ErrorBoundary>
-            <div className='col'>
-              <div>
-                {
-                  plotLoading ? <FontAwesomeIcon icon={faHourglassStart} /> : <></>
-                }
-              </div>
+        {loading ? <Spinner /> : <></>}
+        <div style={{ padding: '1em' }}>
+          {/* Absorbance Plot and Well Selection */}
+          <div style={{ display: 'flex', gap: '1em', marginBottom: '1em', alignItems: 'flex-start' }}>
+            <div style={{ flex: 3 }}>
+              <ErrorBoundary fallback={ErrorFallback}>
+                <AbsorbancePlotMultiple data={wellSelection} result={result} title={`Exp ${result?.experiment_id || 'N/A'} Result ${result?.id || 'N/A'}: ${result?.compound?.name || 'Unknown'} vs ${result?.protein?.name || 'Unknown'} - Absorbance Spectra (${wellSelectionKey.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())})`} />
+              </ErrorBoundary>
+            </div>
+            <div style={{ flex: 1 }}>
               <table className="result-table">
                 <tbody>
                   {
@@ -173,9 +156,7 @@ export default function ResultPage(props) {
                     ].map((item, idx) =>
                       <tr key={idx} onClick={() => {
                         setWellSelectionKey(item.value);
-
-                      }
-                      } style={{ cursor: 'pointer' }}>
+                      }} style={{ cursor: 'pointer' }}>
                         <td>
                           <input type='checkbox'
                             checked={wellSelectionKey === item.value}
@@ -192,24 +173,28 @@ export default function ResultPage(props) {
               </table>
             </div>
           </div>
-          <div className='main-content' >
-            <ResponsePlot
-              style={{ width: '100%' }}
-              {...result}
-            />
-            <ResultTable {...result} />
-            <ResultResponseTable data={result?.dose_response} result_id={result?.id} setResult={setResult} />
+          
+          {/* Response Plot, Tables, and Annotations */}
+          <div style={{ display: 'flex', gap: '1em', marginBottom: '1em', alignItems: 'flex-start', height: '500px' }}>
+            <div style={{ flex: 2, height: '100%' }}>
+              <ResponsePlot
+                style={{ width: '100%', height: '100%' }}
+                title={`Exp ${result?.experiment_id || 'N/A'} Result ${result?.id || 'N/A'}: ${result?.compound?.name || 'Unknown'} vs ${result?.protein?.name || 'Unknown'} - Dose-Response`}
+                {...result}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <ResultResponseTable data={result?.dose_response} result_id={result?.id} setResult={setResult} />
+            </div>
+          </div>
+          
+          {/* Compound and Protein */}
+          <div className='row'>
+            <Compound {...result?.compound} />
+            <ProteinCard {...result?.protein} />
             <ResultAnnotate {...result} />
           </div>
         </div>
-        {/* <div className='col'> */}
-        {/* <div className='row'> */}
-        {/*   <Compound {...result?.compound} /> */}
-        {/*   <ProteinCard {...result?.protein} /> */}
-        {/*   {/* <Protein {...result?.protein} /> */}
-        {/*   <ResultAnnotate checked={result.checked} accepted={result.accepted} /> */}
-        {/* </div> */}
-        {/* </div> */}
       </div>
     </ResultContext.Provider >
   </div >

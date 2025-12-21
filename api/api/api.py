@@ -26,6 +26,7 @@ api.include_router(routes.well.router, prefix="/well")
 api.include_router(routes.absorbance.router, prefix="/absorbance")
 api.include_router(routes.protein.router, prefix="/protein")
 api.include_router(routes.comment.router, prefix="/comment")
+api.include_router(routes.compound.router, prefix="/compound")
 
 
 @api.on_event("startup")

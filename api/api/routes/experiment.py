@@ -1,8 +1,9 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import selectinload
+from sqlalchemy import func
 from sqlmodel import Session, select
-from ..model import Experiment, Result, engine
+from ..model import Experiment, Result, Plate, engine
 from ..dependencies import get_session, common_parameters
 from .serializers import ExperimentSummaryReturnType, ExperimentDetailReturnType
 
@@ -16,9 +17,9 @@ async def get_experiments(
     session: Session = Depends(get_session),
     id: str | None = None,
 ) -> list[ExperimentSummaryReturnType]:
-    query = select(Experiment)
+    query = select(Experiment, func.count(func.distinct(Plate.id)).label('num_plates'), func.count(func.distinct(Result.id)).label('num_results')).outerjoin(Plate, Plate.experiment_id == Experiment.id).outerjoin(Result, Result.experiment_id == Experiment.id).group_by(Experiment.id).offset(common_parameters["offset"]).limit(common_parameters["limit"])
     data = session.exec(query).all()
-    return data
+    return [ExperimentSummaryReturnType(**exp.__dict__, num_plates=num_p, num_results=num_r) for exp, num_p, num_r in data]
 
 
 @router.get("/{id}")
@@ -28,17 +29,7 @@ async def get_experiment(
     id: str | None = None,
 ) -> ExperimentDetailReturnType:
     query = select(Experiment).where(Experiment.id == id)
-    query = query.options(
-        selectinload(Experiment.plates),
-        selectinload(Experiment.results),  # .selectinload(Result.test_wells),
-    )
     data = session.exec(query).first()
-    # for result in data.results:
-    #     total_well_vols = [i.total_volume for i in result.test_wells]
-    #     assert len(set(total_well_vols)) == 1
-    #     vol = total_well_vols[0]
-    #     result.well_volume = vol
-    #     # attach to return type
     if data is None:
         raise HTTPException(status_code=404)
     return data

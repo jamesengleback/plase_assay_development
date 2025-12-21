@@ -178,7 +178,6 @@ def main(args):
 
                 plate_data_file = model.PlateDataFile(
                     path=file_path,
-                    hash=file_hash(file_path),
                     parse_error=False,
                 )
 
@@ -335,6 +334,10 @@ def main(args):
                                 r_squared = utils.mm.r_squared(
                                     response, utils.mm.curve(concs, vmax, km)
                                 )
+                                # Normalize vmax by a420_max of control (concentration = 0)
+                                a420_max_control = corrected_data.loc[420, concs.argmin()]
+                                if a420_max_control and a420_max_control > 0:
+                                    vmax = vmax / a420_max_control
                                 for conc_i, response_i, test_well, control_well in zip(
                                     concs, response, test_wells, control_wells
                                 ):

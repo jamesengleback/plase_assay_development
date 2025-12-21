@@ -1,11 +1,11 @@
 import './App.css'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
-import ResultListPage from './components/Result/ResultListPage'
-import ResultPage from './components/Result/ResultPage'
-import PlatePage from './components/Plate/PlatePage'
-import ExperimentListPage from './components/Experiment/ExperimentListPage'
-import ExperimentPage from './components/Experiment/ExperimentPage'
+import ResultListPage from './pages/ResultListPage'
+import ResultPage from './pages/ResultPage'
+import PlatePage from './pages/PlatePage'
+import ExperimentListPage from './pages/ExperimentListPage'
+import ExperimentPage from './pages/ExperimentPage'
 import Nav from './components/Nav/Nav'
 
 function App() {

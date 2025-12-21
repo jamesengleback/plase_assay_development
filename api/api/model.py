@@ -88,7 +88,6 @@ class PlateDataFile(SQLModel, table=True):
 
     created_at: datetime.date | None
     path: str
-    hash: str = Field(index=True)
     parse_error: bool
 
 
@@ -170,6 +169,7 @@ class Result(SQLModel, table=True):
 
     locked: bool | None = False
     accepted: bool | None = False
+    active: bool | None = False
     annotations: list["ResultAnnotation"] = Relationship(back_populates="result")
     dose_response: list[DoseResponse] = Relationship(back_populates="result")
 

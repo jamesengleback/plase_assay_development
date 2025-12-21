@@ -144,11 +144,15 @@
   /* justify-content: space-between; */
 }
 
+.info-card {
+  text-align: left;
+}
+
 .comment-submit {
   display: flex;
-  align-items:center;
+  align-items: center;
   flex-direction: row;
-  gap: 0px;
+  gap: 10px;
   padding: 5px;
 
   input {
@@ -157,20 +161,42 @@
     margin-right: 0;
     padding-left: 1em;
     font-size: 14px;
+    flex: 1;
   }
 
   button {
-    height: 32px;
-    width: 32px;
-    border-radius: 32px;
-    font-size: 18px;
-    padding: 0;
-    margin: 6px;
+    height: 2em;
+    width: 120px;
+    border-radius: 16px;
+    font-size: 16px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
   }
 }
 
+.status-banner {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background-color: var(--gruv-16);
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  align-items: center;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+  text-align: center;
+}
+
 .comment-list {
-  padding: 12px;
+  padding: 16px;
   margin: 12px;
   overflow: scroll;
   flex-grow: 1;
@@ -191,11 +217,15 @@
   flex-direction: row;
   justify-content: space-between;
 
+  span {
+    text-align: left;
+  }
+
   button {
     height: fit-content;
     width: fit-content;
     padding: 1px;
-    color: var(--gruv-26);
+    color: red;
     background-color: unset;
   }
 }

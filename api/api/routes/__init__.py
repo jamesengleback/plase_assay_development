@@ -6,3 +6,4 @@ from . import well
 from . import absorbance
 from . import protein
 from . import comment
+from . import compound

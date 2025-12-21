@@ -6,8 +6,8 @@ import infernoScale from '../Absorbance/colors.jsx';
 import CloseIcon from '../Icons/CloseIcon';
 import AbsorbancePlot from '../Absorbance/AbsorbancePlot.jsx';
 
-import './Plate.css';
-import './Well.css';
+import plateStyles from './Plate.module.css';
+import wellStyles from './Well.module.css';
 
 function WellModal(props) {
   const [wellData, setWellData] = useState({})
@@ -30,11 +30,11 @@ function WellModal(props) {
     props?.setExpand(false);
   }
   return (
-    <div className='well-modal-overlay'
+    <div className={wellStyles.wellModalOverlay}
       onClick={closeModal}
     >
-      <div className='well-modal'>
-        <button className='well-modal-close-button' onClick={closeModal}>
+      <div className={wellStyles.wellModal}>
+        <button className={wellStyles.wellModalCloseButton} onClick={closeModal}>
           <CloseIcon {...props} />
         </button>
         <div>
@@ -95,14 +95,14 @@ export default function Well(props) {
       backgroundColor = props.total_volume !== null ? infernoScale(props.total_volume / 50) : '#202325'; // Handle null values
   }
   return (
-    <div className='plate-well'
+    <div className={plateStyles.plateWell}
       style={{ backgroundColor: backgroundColor }}
       onMouseEnter={event => { setExpand(true) }}
       onMouseLeave={event => { setExpand(false) }}
       onClick={event => { setModalExpand(true); setExpand(false) }}
     >
       {
-        expand ? <div className='plate-well-expand'>
+        expand ? <div className={plateStyles.plateWellExpand}>
           <div>
             <strong>{props.address} </strong>
           </div>

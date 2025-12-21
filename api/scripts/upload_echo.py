@@ -137,7 +137,6 @@ def main(args):
 
                     plate_data_file = model.PlateDataFile(
                         path=plate_data_path,
-                        hash=file_hash(plate_data_path),
                         parse_error=False,
                     )
                     try:
@@ -222,7 +221,11 @@ def main(args):
                             session.refresh(test_well)
                             test_wells.append(test_well)
 
-                            well_absorbance = df.loc[test_well_addr, :]
+                            try:
+                                well_absorbance = df.loc[test_well_addr, :]
+                            except KeyError as e:
+                                logging.error(f"Well {test_well_addr} nmy_ot found in CSV. Available wells: {df.index.tolist()[:10]}...")
+                                continue  # Skip this well
 
                             for wavelength, absorbance_value in zip(
                                 well_absorbance.index, well_absorbance.values
@@ -257,7 +260,11 @@ def main(args):
                             session.refresh(control_well)
                             control_wells.append(control_well)
 
-                            well_absorbance = df.loc[control_well_addr, :]
+                            try:
+                                well_absorbance = df.loc[control_well_addr, :]
+                            except KeyError as e:
+                                logging.error(f"Well {control_well_addr} not found in CSV. Available wells: {df.index.tolist()[:10]}...")
+                                continue  # Skip this well
 
                             for wavelength, absorbance_value in zip(
                                 well_absorbance.index, well_absorbance.values
@@ -271,13 +278,21 @@ def main(args):
                                 session.add(absorbance)
                             session.commit()
 
-                        test_data = df.loc[list(block["test_wells"]), :]
+                        try:
+                            test_data = df.loc[list(block["test_wells"]), :]
+                        except KeyError as e:
+                            logging.error(f"Test wells {block['test_wells']} not found in CSV. Available wells: {df.index.tolist()[:10]}...")
+                            test_data = None  # or handle appropriately
 
                         control_wells_addr = block.get("control_wells")
                         if control_wells_addr:
-                            control_data = df.loc[list(control_wells_addr), :]
-                            if control_data.isna().all().all():
-                                control_data = control_data.fillna(0)
+                            try:
+                                control_data = df.loc[list(control_wells_addr), :]
+                                if control_data.isna().all().all():
+                                    control_data = control_data.fillna(0)
+                            except KeyError as e:
+                                logging.error(f"Control wells {control_wells_addr} not found in CSV. Available wells: {df.index.tolist()[:10]}...")
+                                control_data = None
                         else:
                             control_data = None
 
@@ -305,6 +320,11 @@ def main(args):
                                 r_squared = utils.mm.r_squared(
                                     response, utils.mm.curve(concs, vmax, km)
                                 )
+                                # Normalize vmax by a420_max of control (concentration = 0)
+                                corrected_data.index = concs
+                                a420_max_control = corrected_data.loc[concs.min(), 420]
+                                if a420_max_control and a420_max_control > 0:
+                                    vmax = vmax / a420_max_control
                                 for conc_i, response_i, test_well, control_well in zip(
                                     concs, response, test_wells, control_wells
                                 ):
@@ -319,7 +339,8 @@ def main(args):
                                     # session.add(dose_response)
                                     # session.refresh(dose_response)
                                     dose_responses.append(dose_response)
-                            except:
+                            except Exception as e:
+                                logging.warning(f"Could not fit dose response: {e}")
                                 vmax, km, r_squared = None, None, None
                                 dose_response = []
                         else:

@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Form
 from pydantic import NonNegativeFloat
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
+from sqlalchemy import or_, cast, String
 
 import numpy as np
 import utils
@@ -14,6 +15,8 @@ from ..model import (
     DoseResponse,
     ResultAnnotation,
     WellResultLink,
+    Compound,
+    Protein,
 )
 from ..dependencies import get_session, common_parameters
 from .serializers import ResultReturnType, ResultDetailReturnType, AbsorbanceReturnType
@@ -26,24 +29,67 @@ router = APIRouter()
 async def get_results(
     common_parameters: Annotated[dict, Depends(common_parameters)],
     id: int | None = None,
-    experiment_id: float | None = None,
+    experiment_id: int | None = None,
+    locked: bool | None = None,
+    accepted: bool | None = None,
+    protein: str | None = None,
+    well_volume_min: float | None = None,
+    well_volume_max: float | None = None,
+    protein_concentration_min: float | None = None,
+    protein_concentration_max: float | None = None,
+    search: str | None = None,
     session: Session = Depends(get_session),
-) -> list[ResultReturnType]:
+) -> ResultReturnType | list[ResultReturnType]:
 
-    query = select(Result)
+    query = select(Result).options(
+        selectinload(Result.annotations),
+        selectinload(Result.dose_response),
+        selectinload(Result.compound),
+        selectinload(Result.protein),
+    )
 
     if id:
         query = query.where(Result.id == id)
+        data = session.exec(query).first()
+        if not data:
+            raise HTTPException(status_code=404, detail=f"Result with id {id} not found")
+        return data
     elif experiment_id:
-        query = query.where(Result.experiment_id == id)
+        query = query.where(Result.experiment_id == experiment_id)
 
-    query = query.options(
-        selectinload(Result.dose_response),
-        selectinload(Result.compound),
-    )
+    if locked is not None:
+        query = query.where(Result.locked == locked)
+    if accepted is not None:
+        query = query.where(Result.accepted == accepted)
+    if protein:
+        query = query.join(Result.protein).where(
+            Protein.name.ilike(f"%{protein}%")
+        )
+
+    if protein_concentration_min is not None:
+        query = query.where(Result.protein_concentration >= protein_concentration_min)
+    if protein_concentration_max is not None:
+        query = query.where(Result.protein_concentration <= protein_concentration_max)
+
+    # Join with wells for filtering on well properties
+    if well_volume_min is not None or well_volume_max is not None:
+        query = query.join(WellResultLink, WellResultLink.result_id == Result.id).join(Well, WellResultLink.well_id == Well.id)
+        if well_volume_min is not None:
+            query = query.where(Well.volume >= well_volume_min)
+        if well_volume_max is not None:
+            query = query.where(Well.volume <= well_volume_max)
+        query = query.distinct()
+
+    if search:
+        query = query.join(Compound, Result.compound_id == Compound.id, isouter=True).where(
+            or_(
+                cast(Result.id, String).ilike(f"%{search}%"),
+                Compound.name.ilike(f"%{search}%")
+            )
+        )
 
     query = query.offset(common_parameters["offset"]).limit(common_parameters["limit"])
-    data = session.exec(query)
+    data = session.exec(query).all()
     return data
 
 

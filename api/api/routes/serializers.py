@@ -24,6 +24,10 @@ class ProteinReturnType(BaseModel):
 
 class CompoundReturnType(BaseModel):
     id: int
+    name: str | None
+
+class CompoundVerboseReturnType(BaseModel):
+    id: int
     canonical_smiles: str | None
     name: str | None
     svg: str | None
@@ -49,7 +53,7 @@ class PlateDataFile(BaseModel):
 class AbsorbanceReturnType(BaseModel):
     id: int
 
-    plate_data_file_id: int | None
+    # plate_data_file_id: int | None
     # plate_data_file: 'PlateDataFile'
     well_id: int | None
 
@@ -131,6 +135,7 @@ class ResultReturnType(BaseModel):
     id: int
     experiment_id: int | None
     accepted: bool | None
+    active: bool | None
     locked: bool | None
     annotations: list[ResultAnnotationReturnType] | None
 
@@ -151,21 +156,20 @@ class ResultDetailReturnType(ResultReturnType):
 class ExperimentSummaryReturnType(BaseModel):
     id: int
     start_date: datetime.datetime | None
-    plates: list[Plate]
-    results: list[ResultReturnType]
-    # binding_experiments: list["BindingExperiment"]
-    # dispense_assay_mix: AssayMixDispenseMethod | None
     dispense_assay_mix: str | None
     dispense_ligands: LigandDispenseMethod | None
     centrifuge_minutes: int | None
     centrifuge_rpm: int | None
     protein_days_thawed: int | None
+    num_plates: int
+    num_results: int
+
+    class Config:
+        from_attributes = True
 
 
 class ExperimentDetailReturnType(BaseModel):
     id: int
-    plates: list[Plate]
-    results: list[ResultReturnType]
     start_date: datetime.datetime | None
     dispense_assay_mix: str | None
     # dispense_assay_mix: AssayMixDispenseMethod | None

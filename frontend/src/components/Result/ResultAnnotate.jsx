@@ -1,42 +1,27 @@
 import { useState, useEffect, useContext } from 'react';
+import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faDeleteLeft,
-  faComment,
-  faSquareCheck,
-  faHourglassStart,
   faLock,
   faLockOpen,
   faCheckCircle,
   faCircleXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { ResultContext } from './ResultContext';
+import Spinner from '../utils/Spinner/Spinner';
 
 export default function ResultAnnotate(props) {
   const [comments, setComments] = useState([])
-  const [commentInput, setCommentInput] = useState([])
+  const [commentInput, setCommentInput] = useState('')
   const [locked, setLocked] = useState(props.locked)
   const [accepted, setAccepted] = useState(props.accepted)
+  const [lockLoading, setLockLoading] = useState(false)
+  const [acceptLoading, setAcceptLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const resultContext = useContext(ResultContext);
   const id = resultContext.id
-
-  // useEffect(() => {
-  //   const handleKeyDown = (event) => {
-  //     switch (event.key) {
-  //       case 'Enter':
-  //         event.preventDefault();
-  //         console.warn('Enter')
-  //         break;
-  //     }
-  //   };
-  //
-  //   window.addEventListener('keydown', handleKeyDown);
-  //
-  //   return () => {
-  //     window.removeEventListener('keydown', handleKeyDown);
-  //   };
-  // }, [id]);
 
   useEffect(() => {
     setComments(props.annotations)
@@ -44,126 +29,154 @@ export default function ResultAnnotate(props) {
     setLocked(props.locked)
   }, [props]);
 
-  // useEffect(() => {
-  //   if (id) {
-  //     fetch(`http://localhost:8008/comment/?result_id=${id}`)
-  //       .then(res => res.json())
-  //       .then(json => { setComments(json); })
-  //       .catch(err => { console.error(err) })
-  //   }
-  // }, [props, id]);
-
   return (
     <div className='info-card'>
-      <div className='row comment-submit'>
-        <form action={(data) => {
-          const form = new FormData()
-          form.append('result_id', id)
-          form.append('comment', data.get('comment'))
-          fetch(`http://localhost:8008/comment/`,
-            {
-              method: 'POST',
-              body: form
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'nowrap' }}>
+      <form onSubmit={async (e) => {
+        e.preventDefault();
+        if (!commentInput.trim()) {
+          setError('Comment cannot be empty');
+          return;
+        }
+        setError('');
+        const form = new FormData()
+        form.append('result_id', id)
+        form.append('comment', commentInput)
+        try {
+          const res = await fetch(`http://localhost:8008/comment/`, {
+            method: 'POST',
+            body: form
+          });
+          if (!res.ok) {
+            const errorJson = await res.json();
+            throw new Error(JSON.stringify(errorJson));
+          }
+          const json = await res.json();
+          setComments([json, ...comments]);
+          setCommentInput('');
+        } catch (err) {
+          console.error(err);
+          try {
+            const errorDetail = JSON.parse(err.message).detail;
+            setError(errorDetail || 'Failed to add comment');
+          } catch {
+            setError('Failed to add comment');
+          }
+        }
+      }}
+        style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+      >
+        <input id='comment-input'
+          name='comment'
+          type='text'
+          value={commentInput}
+          onChange={(e) => setCommentInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              document.getElementById('comment-input').form.requestSubmit();
             }
-          )
-            .then(res => {
-              if (!res.ok) {
-                return res.json().then(errorJson => {
-                  throw new Error(JSON.stringify(errorJson));
-                });
-              }
-              return res.json();
-            })
-            .then(json => {
-              setComments([json, ...comments]);
-              setCommentInput('');
-            })
-            .catch(err => { console.error(err) })
-        }}
-          className='comment-submit'
-        >
-          {/* <label htmlFor='comment-input'> Comments </label> */}
-          <input id='comment-input'
-            name='comment'
-            type='text'
-            placeholder='Comment'
-          />
-        </form>
-        <button
-          style={{
-            backgroundColor: locked ? 'var(--gruv-5)' : 'var(--gruv-28)'
           }}
-          onClick={(event) => {
-            const form = new FormData()
-            const val = !locked
+          style={{ height: '2em' }}
+        />
+      </form>
+      {error && <div style={{ color: 'var(--gruv-26)', marginTop: '5px' }}>{error}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+        <button
+          disabled={lockLoading}
+          style={{
+            backgroundColor: locked ? 'var(--gruv-5)' : 'var(--gruv-28)',
+            height: '2em',
+            width: '140px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            textAlign: 'left'
+          }}
+          onClick={async () => {
+            setError('');
+            setLockLoading(true);
+            const val = !locked;
             setLocked(val);
-
-            form.append('lock', val)
-            fetch(`http://localhost:8008/result/${id}`,
-              {
+            const form = new FormData();
+            form.append('lock', val);
+            try {
+              const res = await fetch(`http://localhost:8008/result/${id}`, {
                 method: 'PATCH',
                 body: form
-              }
-            )
-              .then(res => res.json())
-              .then(json => { resultContext.setResult(json) })
-              .catch(err => {
-                console.error(err);
-                setLocked(!locked);
-              })
+              });
+              const json = await res.json();
+              resultContext.setResult(json);
+            } catch (err) {
+              console.error(err);
+              setLocked(!val);
+              setError('Failed to update lock status');
+            } finally {
+              setLockLoading(false);
+            }
           }}
         >
-          {
-            (locked) ?
-              <FontAwesomeIcon icon={faLock} />
-              :
-              <FontAwesomeIcon icon={faLockOpen} />
-          }
+          {lockLoading ? <Spinner /> : (
+            <>
+              <FontAwesomeIcon icon={locked ? faLock : faLockOpen} style={{ marginRight: '5px' }} />
+              <span>{locked ? 'Locked' : 'Unlocked'}</span>
+            </>
+          )}
         </button>
         <button
+          disabled={acceptLoading}
           style={{
-            backgroundColor: accepted ? 'var(--gruv-5)' : 'var(--gruv-16)'
+            backgroundColor: accepted ? 'var(--gruv-5)' : 'var(--gruv-16)',
+            height: '2em',
+            width: '140px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            textAlign: 'left'
           }}
-          onClick={(event) => {
-            const form = new FormData()
-            const val = !accepted
+          onClick={async () => {
+            setError('');
+            setAcceptLoading(true);
+            const val = !accepted;
             setAccepted(val);
-            form.append('accept', val)
-            fetch(`http://localhost:8008/result/${id}`,
-              {
+            const form = new FormData();
+            form.append('accept', val);
+            try {
+              const res = await fetch(`http://localhost:8008/result/${id}`, {
                 method: 'PATCH',
                 body: form
-              }
-            )
-              .then(res => res.json())
-              .then(json => { resultContext.setResult(json) })
-              .catch(err => {
-                console.error(err);
-                setAccepted(!val);
-              })
+              });
+              const json = await res.json();
+              resultContext.setResult(json);
+            } catch (err) {
+              console.error(err);
+              setAccepted(!val);
+              setError('Failed to update accept status');
+            } finally {
+              setAcceptLoading(false);
+            }
           }}
         >
-          {
-            (accepted) ?
-              <FontAwesomeIcon icon={faCheckCircle} />
-              :
-              <FontAwesomeIcon icon={faCircleXmark} />
-
-          }
+          {acceptLoading ? <Spinner /> : (
+            <>
+              <FontAwesomeIcon icon={accepted ? faCheckCircle : faCircleXmark} style={{ marginRight: '5px' }} />
+              <span>{accepted ? 'Accepted' : 'Not Accepted'}</span>
+            </>
+          )}
         </button>
       </div>
-      <div className='comment-list'>
+    </div>
+    <hr style={{ border: '1px solid var(--gruv-3)', margin: '10px 0' }} />
+    <div className='comment-list'>
         {
           comments?.map((item, idx) => <div id={`comment-${idx}`} className='comment' key={idx}>
             <span>{item.comment}  </span>
-            <button onClick={() => {
-
+            <button style={{ color: 'var(--gruv-26)', backgroundColor: 'var(--gruv-2)' }} onClick={() => {
               fetch(`http://localhost:8008/comment/${item.id}`,
                 { method: 'DELETE' }
               )
-                .then(res => {
+                .then(() => {
                   setComments(comments.filter(c => c.id !== item.id))
-                  // document.getElementById(`comment-${idx}`).remove() 
                 })
                 .catch(err => { console.log(err) })
             }}>
@@ -174,4 +187,10 @@ export default function ResultAnnotate(props) {
       </div>
     </div >
   )
+}
+
+ResultAnnotate.propTypes = {
+  annotations: PropTypes.array,
+  locked: PropTypes.bool,
+  accepted: PropTypes.bool,
 }

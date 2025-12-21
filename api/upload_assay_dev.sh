@@ -10,7 +10,8 @@ python scripts/upload_manual.py ../3_TestFattyAcids/config_3.json \
                                 ../11_Validation/config_11.json \
                                 ../12_ThermoPlateCompare/config_12.json \
                                 ../13_TitrationValidationPilot/config_13.json \
-                                ../14_DMSO_dilutionScheme/config_14.json
+                                ../14_DMSO_dilutionScheme/config_14.json \
+                                ../22_validation2/config_22.json
 
 python scripts/upload_echo.py  \
                     ../15_Echo/config_15.json \
@@ -19,5 +20,4 @@ python scripts/upload_echo.py  \
                     ../18_BuffersNCompounds/config_18.json \
                     ../19_Validation/config_19.json \
                     ../20_SpinShift/config_20.json \
-                    ../21_SpinShift2/config_21.json \
-                    ../22_validation2/config_22.json
+                    ../21_SpinShift2/config_21json

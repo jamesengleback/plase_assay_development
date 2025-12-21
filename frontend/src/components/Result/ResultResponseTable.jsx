@@ -1,5 +1,4 @@
-import * as d3 from 'd3';
-import './Result.css'
+import styles from './Result.module.css'
 import PropTypes from 'prop-types';
 
 export default function ResultResponseTable(props) {
@@ -8,8 +7,8 @@ export default function ResultResponseTable(props) {
     return <p>No response data available.</p>;
   }
   return (
-    <div className='table-container'>
-      <table className="result-table">
+    <div className={styles.tableContainer}>
+      <table className={styles.resultTable}>
         <thead>
           <tr>
             <th>Concentration</th>
@@ -18,7 +17,7 @@ export default function ResultResponseTable(props) {
           </tr>
         </thead>
         <tbody>
-          {props?.data.map(item => (
+          {props?.data.toSorted((a,b) => a.concentration > b.concentration).map(item => (
             <tr key={item.id}
               style={{ cursor: 'pointer' }}
               onClick={() => {

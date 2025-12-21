@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import ResponsePlot from './ResponsePlot';
 import ResultResponseTable from './ResultResponseTable';
 import Compound from '../Compound/Compound';
-import './Result.css'
+import styles from './Result.module.css'
 
 export function ResultTable(props) {
   return (
-    <div className="table-container">
-      <table className="result-table">
+    <div className={styles.tableContainer}>
+      <table className={styles.resultTable}>
         <tbody>
           {/*
             <tr>
@@ -37,8 +36,8 @@ export function ResultTable(props) {
 export default function Result(props) {
 
   return (
-    <div className="summary-card">
-      <h3 className="compound-name">
+    <div className={styles.summaryCard}>
+      <h3 className={styles.compoundName}>
         <Link to={`/experiment/${props.experiment_id}`}>
           Experiment {props.experiment_id}
         </Link>
@@ -48,10 +47,10 @@ export default function Result(props) {
         </Link>
       </h3>
 
-      <div className="row">
-        <div className="left-column">
-          <div className="table-container">
-            <table className="result-table">
+      <div className={styles.row}>
+        <div className={styles.leftColumn}>
+          <div className={styles.tableContainer}>
+            <table className={styles.resultTable}>
               <tbody>
                 <tr>
                   <th colSpan="2">Michaelis Menten Parameters</th>
@@ -72,11 +71,11 @@ export default function Result(props) {
             </table>
           </div>
         </div>
-        <div className="right-column">
+        <div className={styles.rightColumn}>
           <Compound {...props?.compound} />
         </div>
       </div>
-      <div className="response-plot-container">
+      <div className={styles.responsePlotContainer}>
         <ResponsePlot
           km={props.km}
           vmax={props.vmax}

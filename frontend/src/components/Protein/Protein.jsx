@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import './Protein.css';
+import styles from './Protein.module.css';
 
 const aminoAcidColors = {
     // Nonpolar, Aliphatic (often found in protein interiors)
@@ -41,7 +41,7 @@ function AminoAcid(props) {
     return (
         <>
             <code
-                className='amino-acid'
+                className={styles.aminoAcid}
                 style={{
                     backgroundColor: aminoAcidColors[aminoAcid.toUpperCase()] || 'white',
                 }}
@@ -52,7 +52,7 @@ function AminoAcid(props) {
             </code>
             {
                 hover ?
-                    <div className='hover-label' >
+                    <div className={styles.hoverLabel} >
                         <code>{aminoAcid}{index}</code>
                     </div>
                     :
@@ -72,7 +72,7 @@ export default function Protein(props) {
         return sequence.split('').map((aminoAcid, index) => (
             <span key={index}>
                 <code
-                    className='amino-acid'
+                    className={styles.aminoAcid}
                     style={{
                         backgroundColor: aminoAcidColors[aminoAcid.toUpperCase()] || 'white',
                     }}
@@ -104,11 +104,10 @@ export default function Protein(props) {
         ));
     };
 
-    console.warn(props.sequence)
     return (
         <div className='info-card'>
             <span><strong>{props.name}</strong></span>
-            <div className='hover-label'>
+            <div className={styles.hoverLabel}>
                 {
                     hoverSequence ?
                         <code>{hoverAA.aminoAcid}{hoverAA.index}</code>
@@ -116,7 +115,7 @@ export default function Protein(props) {
                         <></>
                 }
             </div>
-            <div className='protein-sequence'
+            <div className={styles.proteinSequence}
                 onMouseEnter={() => { setHoverSequence(true) }}
                 onMouseLeave={() => { setHoverSequence(false) }}
             >

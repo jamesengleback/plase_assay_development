@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './Plate.css';
+import styles from './Plate.module.css';
 import PropTypes from 'prop-types';
 import Well from './Well.jsx';
 import Chip from '../UI/Chip.jsx';
@@ -61,7 +61,7 @@ function PlateArray(props) {
   }, [colorBy, props.id])
 
   return (
-    <div className='plate-array-area'>
+    <div className={styles.plateArrayArea}>
       <select onChange={event => { setColorBy(event.target.value) }} value={colorBy} >
         <option value='compound_concentration'>Compound Concentration</option>
         <option value='protein_concentration'>Protein Concentration</option>
@@ -72,7 +72,7 @@ function PlateArray(props) {
         <tbody>
           {
             [...Array(nRows + 1).keys()].map(rowNo => (
-              <tr key={`row-${rowNo}`} className='plate-array-row'>
+              <tr key={`row-${rowNo}`} className={styles.plateArrayRow}>
                 {
                   [...Array(nCols + 1).keys()].map(colNo => (
                     (rowNo === 0) ?
@@ -119,9 +119,9 @@ export default function Plate(props) {
     'experiment',
   ]
   return (
-    <div className='plate'>
-      <div className='row'>
-        <div className='column'>
+    <div className={styles.plate}>
+      <div className={styles.row}>
+        <div className={styles.column}>
           {params.map((item, idx) => <Chip key={idx} style={{ backgroundColor: `var(--gruv-${idx + 15})` }} label={<span>{item} {props[item]}</span>}
             icon={
               <FontAwesomeIcon style={{ color: 'var(--gruv-1)' }} icon={faFlask} />}

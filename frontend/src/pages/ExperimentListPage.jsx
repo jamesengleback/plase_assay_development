@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
-import ExperimentCard from './ExperimentCard';
+import ExperimentCard from '../components/Experiment/ExperimentCard';
 
 export default function ExperimentListPage() {
   const [experiments, setExperiments] = useState([])

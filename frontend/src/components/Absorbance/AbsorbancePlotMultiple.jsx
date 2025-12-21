@@ -1,17 +1,33 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import infernoScale, { responsePlotColors } from './colors.jsx';
 
-export default function AbsorbancePlotMultiple({ data, result }) {
+export default function AbsorbancePlotMultiple({ data, result, title }) {
   // console.log(result.dose_response)
   // console.log(data)
   // console.log(result)
   const excludeDict = result?.dose_response && Object.fromEntries(result?.dose_response?.map(i => [i.concentration, i.exclude]))
   const svgRef = useRef();
   const margin = { top: 20, right: 30, bottom: 45, left: 60 };
-  const width = (window.innerWidth * 0.8) - margin.left - margin.right;
-  const height = 400 - margin.top - margin.bottom;
+  const [dimensions, setDimensions] = useState({
+    width: (window.innerWidth * 0.8) - margin.left - margin.right,
+    height: 400 - margin.top - margin.bottom
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        width: (window.innerWidth * 0.8) - margin.left - margin.right,
+        height: 400 - margin.top - margin.bottom
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const { width, height } = dimensions;
   const limits = {
     xMin: 300,
     xMax: 800,
@@ -39,6 +55,7 @@ export default function AbsorbancePlotMultiple({ data, result }) {
     const svg = d3.select(svgRef.current)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
+      .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
       .style("background-color", responsePlotColors.bg);
 
     const g = svg.select("g").remove();
@@ -59,6 +76,14 @@ export default function AbsorbancePlotMultiple({ data, result }) {
       .attr('transform', `translate(0, ${height})`)
       .call(d3.axisBottom(xScale));
 
+    newG.append("text")
+      .attr("class", "x-label")
+      .attr("x", width / 2)
+      .attr("y", height + margin.bottom - 5)
+      .style("text-anchor", "middle")
+      .style("fill", responsePlotColors.fg)
+      .text("Wavelength (nm)");
+
     newG.append('g')
       .call(d3.axisLeft(yScale));
 
@@ -76,24 +101,68 @@ export default function AbsorbancePlotMultiple({ data, result }) {
         exit => exit.remove()
       );
 
-    newG.selectAll(".x-label")
-      .data(["Wavelength (nm)"])
+    newG.selectAll(".title")
+      .data([title])
       .join(
-        enter => enter
-          .append("text")
-          .attr("class", "x-label")
-          .attr("transform", `translate(${width / 2}, ${height + (0.8 * margin.bottom)})`)
-          .style("fill", responsePlotColors.fg)
-          .style("text-anchor", "middle")
-          .text(d => d),
-        update => update.text(d => d),
+        enter => {
+          const textElement = enter.append("text")
+            .attr("class", "title")
+            .attr("x", width / 2)
+            .attr("y", title && title.length > 60 ? 2 : 5)
+            .style("text-anchor", "middle")
+            .style("fill", responsePlotColors.fg)
+            .style("font-size", title && title.length > 50 ? "12px" : "16px")
+            .style("font-weight", "bold");
+          
+          if (title && title.length > 60) {
+            const mid = title.lastIndexOf(' ', 30);
+            const line1 = title.substring(0, mid);
+            const line2 = title.substring(mid + 1);
+            textElement.append("tspan")
+              .attr("x", width / 2)
+              .attr("dy", "0")
+              .text(line1);
+            textElement.append("tspan")
+              .attr("x", width / 2)
+              .attr("dy", "1.2em")
+              .text(line2);
+          } else {
+            textElement.text(d => d);
+          }
+          return textElement;
+        },
+        update => {
+          update.each(function(d) {
+            const textElement = d3.select(this);
+            textElement.selectAll("tspan").remove(); // Clear existing tspans
+            textElement.attr("y", d && d.length > 60 ? 2 : 5)
+              .style("font-size", d && d.length > 50 ? "12px" : "16px");
+            
+            if (d && d.length > 60) {
+              const mid = d.lastIndexOf(' ', 30);
+              const line1 = d.substring(0, mid);
+              const line2 = d.substring(mid + 1);
+              textElement.append("tspan")
+                .attr("x", width / 2)
+                .attr("dy", "0")
+                .text(line1);
+              textElement.append("tspan")
+                .attr("x", width / 2)
+                .attr("dy", "1.2em")
+                .text(line2);
+            } else {
+              textElement.text(d);
+            }
+          });
+          return update;
+        },
         exit => exit.remove()
       );
 
     if (hasData) {
       const allAbsorbanceData = data.map(trace => zeroEightHundred(trace.absorbance))
 
-      const concs = [...new Set(data.map(item => item.compound_concentration))]
+      const concs = [...new Set(data.map(item => item.compound_concentration))].toSorted((a, b) => a > b)
 
       if (allAbsorbanceData.length === 0) return;
 
@@ -156,7 +225,7 @@ export default function AbsorbancePlotMultiple({ data, result }) {
         .style('fill', responsePlotColors.fg)
     }
 
-  }, [data, result]);
+  }, [data, result, width, height]);
 
   return (
     <>
@@ -180,4 +249,5 @@ AbsorbancePlotMultiple.propTypes = {
       })
     ),
   }),
+  title: PropTypes.string,
 };
